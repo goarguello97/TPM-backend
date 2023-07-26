@@ -15,9 +15,11 @@ class UserController {
   static async getUsers(req: Request, res: Response) {
     try {
       const users = await User.find();
-      res.status(200).json({ users });
+      res.status(200).json({ status: "Success", payload: users });
     } catch (error) {
-      res.status(error.code || 500).json({ message: error.message });
+      res
+        .status(error.code || 500)
+        .json({ status: "Error", message: error.message });
     }
   }
 
@@ -25,9 +27,13 @@ class UserController {
     const { id } = req.query;
     try {
       const user = await User.findById(id);
-      res.status(200).json(user);
+      if (!user)
+        return res
+          .status(500)
+          .json({ status: "Error", error: "No existe el usuario." });
+      res.status(200).json({ status: "Success", payload: user });
     } catch (error) {
-      res.status(500).json(error.message);
+      res.status(500).json({ status: "Error", error: error.message });
     }
   }
 
@@ -39,11 +45,15 @@ class UserController {
       if (userEmail.length > 0 && userUsername.length > 0)
         return res
           .status(403)
-          .json({ message: "El usuario y email ya existe" });
+          .json({ status: "Error", message: "El usuario y email ya existe" });
       if (userUsername.length > 0)
-        return res.status(403).json({ message: "El usuario ya existe" });
+        return res
+          .status(403)
+          .json({ status: "Error", message: "El usuario ya existe" });
       if (userEmail.length > 0)
-        return res.status(403).json({ message: "El email ya existe" });
+        return res
+          .status(403)
+          .json({ status: "Error", message: "El email ya existe" });
       const salt = await bcrypt.genSalt(10);
       const passWordEncrypted = await bcrypt.hash(password, salt);
 
@@ -68,12 +78,12 @@ class UserController {
           html: template,
         });
       } catch (error) {
-        res.status(500).json({ message: error });
+        res.status(500).json({ status: "Error", message: error });
       }
       await newUser.save();
-      res.status(201).json({ message: "Usuario creado" });
+      res.status(201).json({ status: "Success", message: "Usuario creado" });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ status: "Error", message: error.message });
     }
   }
 
@@ -89,9 +99,13 @@ class UserController {
       }
       const updatedUser = await User.findByIdAndUpdate(id, body, { new: true });
       if (!updatedUser) throw new CustomError("El usuario no existe", 404);
-      res.status(200).json({ message: "Usuario actualizado", updatedUser });
+      res.status(200).json({
+        status: "Success",
+        message: "Usuario actualizado",
+        payload: updatedUser,
+      });
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      res.status(400).json({ status: "Error", message: error.message });
     }
   }
 
@@ -126,9 +140,13 @@ class UserController {
       };
       const token = generateToken(payload);
       res.cookie("token", token);
-      res.status(201).json({ message: "Logueo correcto", token });
+      res
+        .status(201)
+        .json({ status: "Success", message: "Logueo correcto", token });
     } catch (error) {
-      res.status(error.code || 500).json({ message: error.message });
+      res
+        .status(error.code || 500)
+        .json({ status: "Error", message: error.message });
     }
   }
 
@@ -146,18 +164,24 @@ class UserController {
     try {
       const data = await dataToken(token);
       if (data === null) {
-        return res.status(500).json({ message: "Error" });
+        return res.status(500).json({ status: "Error", message: "Error" });
       }
       const { email } = data.user;
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(400).json({ message: "Usuario no existe" });
+        return res
+          .status(400)
+          .json({ status: "Error", message: "Usuario no existe" });
       }
       user.verify = true;
       await user.save();
-      res.status(200).json({ message: "Usuario verificado" });
+      res
+        .status(200)
+        .json({ status: "Success", message: "Usuario verificado" });
     } catch (error) {
-      res.status(error.code || 500).json({ message: error.message });
+      res
+        .status(error.code || 500)
+        .json({ status: "Error", message: error.message });
     }
   }
 }

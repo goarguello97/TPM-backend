@@ -1,6 +1,12 @@
-import { model, Schema } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
-const MatchSchema = new Schema(
+interface Match {
+  user: Types.ObjectId;
+  userMatch: Types.ObjectId;
+  accepted: boolean;
+}
+
+const MatchSchema = new Schema<Match>(
   {
     //Aca van nuestros datos para que el solicitado sepa quien le matchea.
     user: { type: Schema.Types.ObjectId, ref: "User", require: true },

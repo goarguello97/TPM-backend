@@ -5,6 +5,7 @@ import morgan from "morgan";
 import router from "./api/routes/index.routes";
 import connectDB from "./api/db";
 import createRoles from "./api/config/initialSetup";
+import cookieParser from "cookie-parser";
 
 const app = express();
 dotenv.config();
@@ -12,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 connectDB();
 createRoles();
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));

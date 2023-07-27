@@ -140,18 +140,19 @@ class UserController {
       };
       const token = generateToken(payload);
       res.cookie("token", token);
-      res
-        .status(201)
-        .json({ status: "Success", message: "Logueo correcto", token });
+      res.status(200).json({
+        status: "Success",
+        payload: { message: "Logueo correcto", user: payload, token },
+      });
     } catch (error) {
       res
         .status(error.code || 500)
-        .json({ status: "Error", message: error.message });
+        .json({ status: "Error", payload: { message: error.message } });
     }
   }
 
   static async secret(req: AuthRequest, res: Response) {
-    res.json(req.user);
+    res.status(200).json({ status: "Success", payload: req.user });
   }
 
   static async logoutUser(req: Request, res: Response) {

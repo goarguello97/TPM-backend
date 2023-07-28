@@ -1,5 +1,5 @@
 import { Schema } from "express-validator";
-import emailUnique from "../helpers/emailUnique"
+import emailUnique from "../helpers/emailUnique";
 import usernameUnique from "../helpers/userUnique";
 
 export const user: Schema = {

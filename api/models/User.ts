@@ -7,14 +7,14 @@ const salt = bcrypt.genSaltSync(10);
 const UserSchema = new Schema(
   {
     username: { type: String, require: true, unique: true },
-    name: { type: String, require: true },
-    lastname: { type: String, require: true },
+    name: { type: String},
+    lastname: { type: String},
     country: String,
     dateOfBirth: Date,
     email: { type: String, require: true, unique: true },
     password: { type: String, require: true },
     mentor: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    role: { type: Schema.Types.ObjectId, required: true, ref: "Role" },
+    role: { type: Schema.Types.ObjectId, ref: "Role" },
     md: [{ type: Schema.Types.ObjectId, ref: "MD" }],
     matchReq: [{ type: Schema.Types.ObjectId, ref: "User" }],
     matchSend: [{ type: Schema.Types.ObjectId, ref: "User" }],

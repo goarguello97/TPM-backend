@@ -143,10 +143,10 @@ class UserController {
     try {
       const { email, password } = req.body;
       const user = await User.findOne({ email });
-      if (!user) throw new CustomError("Usuario no encontrado", 404);
-      if (!user.verify) throw new CustomError("Debes verificar tu cuenta", 401);
+      if (!user) throw new CustomError("User not found.", 404);
+      if (!user.verify) throw new CustomError("You must verify your account.", 401);
       const passwordOk = user.validatePassword(password);
-      if (!passwordOk) throw new CustomError("Credenciales inválidas", 401);
+      if (!passwordOk) throw new CustomError("Invalid credentials.", 401);
       const payload = {
         email: user.email,
         name: user.name,

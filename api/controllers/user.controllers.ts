@@ -142,9 +142,12 @@ class UserController {
   static async loginUser(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email }).populate("role", {
+        role: 1,
+      });
       if (!user) throw new CustomError("User not found.", 404);
-      if (!user.verify) throw new CustomError("You must verify your account.", 401);
+      if (!user.verify)
+        throw new CustomError("You must verify your account.", 401);
       const passwordOk = user.validatePassword(password);
       if (!passwordOk) throw new CustomError("Invalid credentials.", 401);
       const payload = {
@@ -152,6 +155,7 @@ class UserController {
         name: user.name,
         lastname: user.lastname,
         id: user.id,
+        role: user.role,
       };
       const token = generateToken(payload);
       res.cookie("token", token);

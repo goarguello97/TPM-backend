@@ -156,6 +156,7 @@ class UserController {
         lastname: user.lastname,
         id: user.id,
         role: user.role,
+        firstTime: user.firstTime,
       };
       const token = generateToken(payload);
       res.cookie("token", token);

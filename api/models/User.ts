@@ -7,8 +7,8 @@ const salt = bcrypt.genSaltSync(10);
 const UserSchema = new Schema(
   {
     username: { type: String, require: true, unique: true },
-    name: { type: String},
-    lastname: { type: String},
+    name: { type: String },
+    lastname: { type: String },
     country: String,
     dateOfBirth: Date,
     email: { type: String, require: true, unique: true },
@@ -23,6 +23,7 @@ const UserSchema = new Schema(
     token: String,
     skills: [String],
     avatar: String,
+    firstTime: { type: Boolean, default: true },
   },
   {
     methods: {

@@ -40,7 +40,8 @@ class UserController {
   }
 
   static async addUser(req: Request, res: Response) {
-    const { username, name, lastname, email, password, role } = req.body;
+    const { username, name, lastname, email, password, role, dateOfBirth } =
+      req.body;
     const userEmail = await User.find({ email });
     const userUsername = await User.find({ username });
     try {
@@ -69,6 +70,7 @@ class UserController {
         email,
         password: passWordEncrypted,
         role,
+        dateOfBirth,
       });
 
       const token = generateTokenRegister(newUser);

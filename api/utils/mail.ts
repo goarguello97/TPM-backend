@@ -22,7 +22,7 @@ const getTemplate = (userName: string, token: string) => {
     <h2>¡Hola ${userName}!</h2>
     <p>Gracias por registrarte. Debes activar tu cuenta con el link a continuación</p>
     <a
-        href="http://localhost:3001/auth/${token}"
+        href="http://localhost:3000/auth/${token}"
         target="_blank"
     >Confirmar cuenta</a>
   </div>`;

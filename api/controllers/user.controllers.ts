@@ -11,12 +11,11 @@ import {
 } from "../config/token";
 import { AuthRequest } from "../interfaces/requestInterface";
 import { getTemplate, getTemplateRecover, transporter } from "../utils/mail";
-import { userInterface } from "../interfaces/user.interface";
 
 class UserController {
   static async getUsers(req: Request, res: Response) {
     try {
-      const users = await User.find();
+      const users = await User.find().populate("role");
       res.status(200).json({ status: "Success", payload: { users } });
     } catch (error) {
       res

@@ -1,10 +1,12 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 export interface userInterface {
   _id: string;
   username: string;
   name: string;
   lastname: string;
+  country: string;
+  dateOfBirth: Date;
   email: string;
   password: string;
   mentor: [Types.ObjectId];
@@ -15,4 +17,9 @@ export interface userInterface {
   match: [Types.ObjectId];
   verify: boolean;
   skills: string[];
+  token: string;
+  avatar: string;
+  tokenRecover: string;
 }
+
+

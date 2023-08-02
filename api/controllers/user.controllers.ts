@@ -6,10 +6,12 @@ import Role from "../models/Role";
 import {
   dataToken,
   generateToken,
+  generateTokenRecover,
   generateTokenRegister,
 } from "../config/token";
 import { AuthRequest } from "../interfaces/requestInterface";
-import { getTemplate, transporter } from "../utils/mail";
+import { getTemplate, getTemplateRecover, transporter } from "../utils/mail";
+import { userInterface } from "../interfaces/user.interface";
 
 class UserController {
   static async getUsers(req: Request, res: Response) {
@@ -80,7 +82,7 @@ class UserController {
         await transporter.sendMail({
           from: `The Perfect Mentor <perfect.mentor.p5@gmail.com>`,
           to: email,
-          subject: "Verificar mail",
+          subject: "Verify email",
           text: "...",
           html: template,
         });
@@ -142,11 +144,11 @@ class UserController {
   }
 
   static async loginUser(req: Request, res: Response) {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email }).populate("role", {
+      role: 1,
+    });
     try {
-      const { email, password } = req.body;
-      const user = await User.findOne({ email }).populate("role", {
-        role: 1,
-      });
       if (!user) throw new CustomError("User not found.", 404);
       if (!user.verify)
         throw new CustomError("You must verify your account.", 401);
@@ -158,7 +160,6 @@ class UserController {
         lastname: user.lastname,
         id: user.id,
         role: user.role,
-        firstTime: user.firstTime,
       };
       const token = generateToken(payload);
       res.cookie("token", token);
@@ -187,20 +188,110 @@ class UserController {
     try {
       const data = await dataToken(token);
       if (data === null) {
-        return res.status(500).json({ status: "Error", message: "Error" });
+        return res.status(500).json({
+          status: "Error",
+          payload: { message: "The token has expired." },
+        });
       }
       const { email } = data.user;
       const user = await User.findOne({ email });
       if (!user) {
         return res
           .status(400)
-          .json({ status: "Error", message: "Usuario no existe" });
+          .json({ status: "Error", message: "Username does not exist." });
       }
       user.verify = true;
       await user.save();
       res.status(200).json({
         status: "Success",
-        payload: { message: "Usuario verificado" },
+        payload: { message: "Verified user." },
+      });
+    } catch (error) {
+      res
+        .status(error.code || 500)
+        .json({ status: "Error", payload: { message: error.message } });
+    }
+  }
+
+  static async recoverPassword(req: Request, res: Response) {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) throw new CustomError("User not found.", 404);
+
+    try {
+      const token = generateTokenRecover(user);
+      const template = getTemplateRecover(user.username, token);
+      try {
+        await transporter.sendMail({
+          from: `The Perfect Mentor <perfect.mentor.p5@gmail.com>`,
+          to: email,
+          subject: "Recover password",
+          text: "...",
+          html: template,
+        });
+      } catch (error) {
+        res.status(500).json({ status: "Error", payload: { message: error } });
+      }
+
+      user.tokenRecover = token;
+      await user.save();
+
+      res.status(200).json({
+        status: "Success",
+        payload: { message: "Check your mailbox, please." },
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ status: "Error", payload: { message: error.message } });
+    }
+  }
+
+  static async authorizeChangePassword(req: Request, res: Response) {
+    const { token } = req.params;
+    try {
+      const data = await dataToken(token);
+      if (data === null) {
+        return res.status(500).json({
+          status: "Error",
+          payload: { message: "The token has expired." },
+        });
+      }
+      const { email } = data.user;
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res
+          .status(400)
+          .json({ status: "Error", message: "Username does not exist." });
+      }
+      if (user.tokenRecover !== token)
+        throw new CustomError("Token is not valid.", 404);
+      // user.tokenRecover = "";
+      // await user.save();
+      res.status(200).json({
+        status: "Success",
+        payload: { user, message: "Authorized to modify." },
+      });
+    } catch (error) {
+      res
+        .status(error.code || 500)
+        .json({ status: "Error", payload: { message: error.message } });
+    }
+  }
+
+  static async updatePassword(req: Request, res: Response) {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) throw new CustomError("User not found.", 404);
+    try {
+      const salt = await bcrypt.genSalt(10);
+      const passWordEncrypted = await bcrypt.hash(password, salt);
+      user.password = passWordEncrypted;
+      await user.save();
+      res.status(200).json({
+        status: "Success",
+        payload: { message: "Password changed successfully." },
       });
     } catch (error) {
       res

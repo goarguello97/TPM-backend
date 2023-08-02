@@ -20,5 +20,8 @@ userRouter.post("/login", UserController.loginUser);
 userRouter.get("/me", verifyAuth, UserController.secret);
 userRouter.post("/logout", UserController.logoutUser);
 userRouter.get("/verify/:token", UserController.verifyUser);
+userRouter.post("/recover-pass", UserController.recoverPassword)
+userRouter.get("/access-pass/:token", UserController.authorizeChangePassword)
+userRouter.patch("/change-pass", UserController.updatePassword)
 
 export default userRouter;

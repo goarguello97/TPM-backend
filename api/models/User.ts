@@ -1,5 +1,4 @@
-import { NextFunction } from "express";
-import mongoose, { model, Schema, Types } from "mongoose";
+import { model, Schema } from "mongoose";
 import bcrypt from "bcrypt";
 
 const salt = bcrypt.genSaltSync(10);
@@ -20,10 +19,9 @@ const UserSchema = new Schema(
     matchSend: [{ type: Schema.Types.ObjectId, ref: "User" }],
     match: [{ type: Schema.Types.ObjectId, ref: "User" }],
     verify: { type: Boolean, default: false },
-    token: String,
     skills: [String],
     avatar: String,
-    firstTime: { type: Boolean, default: true },
+    tokenRecover: { type: String, default: "" },
   },
   {
     methods: {

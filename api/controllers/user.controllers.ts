@@ -6,20 +6,21 @@ import Role from "../models/Role";
 import {
   dataToken,
   generateToken,
+  generateTokenRecover,
   generateTokenRegister,
 } from "../config/token";
 import { AuthRequest } from "../interfaces/requestInterface";
-import { getTemplate, transporter } from "../utils/mail";
+import { getTemplate, getTemplateRecover, transporter } from "../utils/mail";
 
 class UserController {
   static async getUsers(req: Request, res: Response) {
     try {
-      const users = await User.find();
-      res.status(200).json({ status: "Success", payload: users });
+      const users = await User.find().populate("role");
+      res.status(200).json({ status: "Success", payload: { users } });
     } catch (error) {
       res
         .status(error.code || 500)
-        .json({ status: "Error", message: error.message });
+        .json({ status: "Error", payload: { message: error.message } });
     }
   }
 
@@ -31,29 +32,35 @@ class UserController {
         return res
           .status(500)
           .json({ status: "Error", error: "No existe el usuario." });
-      res.status(200).json({ status: "Success", payload: user });
+      res.status(200).json({ status: "Success", payload: { user } });
     } catch (error) {
-      res.status(500).json({ status: "Error", error: error.message });
+      res
+        .status(500)
+        .json({ status: "Error", payload: { message: error.message } });
     }
   }
 
   static async addUser(req: Request, res: Response) {
-    const { username, name, lastname, email, password, role } = req.body;
+    const { username, name, lastname, email, password, role, dateOfBirth } =
+      req.body;
     const userEmail = await User.find({ email });
     const userUsername = await User.find({ username });
     try {
       if (userEmail.length > 0 && userUsername.length > 0)
-        return res
-          .status(403)
-          .json({ status: "Error", message: "El usuario y email ya existe" });
+        throw new CustomError("El usuario y email ya existe.", 403);
+      // return res
+      //   .status(403)
+      //   .json({ status: "Error", message: "El usuario y email ya existe" });
       if (userUsername.length > 0)
-        return res
-          .status(403)
-          .json({ status: "Error", message: "El usuario ya existe" });
+        throw new CustomError("El usuario ya existe.", 403);
+      // return res
+      //   .status(403)
+      //   .json({ status: "Error", message: "El usuario ya existe" });
       if (userEmail.length > 0)
-        return res
-          .status(403)
-          .json({ status: "Error", message: "El email ya existe" });
+        throw new CustomError("El email ya existe.", 403);
+      // return res
+      //   .status(403)
+      //   .json({ status: "Error", message: "El email ya existe" });
       const salt = await bcrypt.genSalt(10);
       const passWordEncrypted = await bcrypt.hash(password, salt);
 
@@ -64,6 +71,7 @@ class UserController {
         email,
         password: passWordEncrypted,
         role,
+        dateOfBirth,
       });
 
       const token = generateTokenRegister(newUser);
@@ -73,17 +81,21 @@ class UserController {
         await transporter.sendMail({
           from: `The Perfect Mentor <perfect.mentor.p5@gmail.com>`,
           to: email,
-          subject: "Verificar mail",
+          subject: "Verify email",
           text: "...",
           html: template,
         });
       } catch (error) {
-        res.status(500).json({ status: "Error", message: error });
+        res.status(500).json({ status: "Error", payload: { message: error } });
       }
       await newUser.save();
-      res.status(201).json({ status: "Success", message: "Usuario creado" });
+      res
+        .status(201)
+        .json({ status: "Success", payload: { message: "Usuario creado" } });
     } catch (error) {
-      res.status(500).json({ status: "Error", message: error.message });
+      res
+        .status(500)
+        .json({ status: "Error", payload: { message: error.message } });
     }
   }
 
@@ -101,11 +113,12 @@ class UserController {
       if (!updatedUser) throw new CustomError("El usuario no existe", 404);
       res.status(200).json({
         status: "Success",
-        message: "Usuario actualizado",
-        payload: updatedUser,
+        payload: { user: updatedUser, message: "Usuario actualizado" },
       });
     } catch (error) {
-      res.status(400).json({ status: "Error", message: error.message });
+      res
+        .status(400)
+        .json({ status: "Error", payload: { message: error.message } });
     }
   }
 
@@ -118,40 +131,50 @@ class UserController {
       if (role.role !== "ADMIN")
         throw new CustomError("No tiene los permisos necesarios", 404);
       await User.findByIdAndDelete(idUserToDelete);
-      res.status(200).json({ message: "El usuario ha sido eliminado" });
+      res.status(200).json({
+        status: "Success",
+        payload: { message: "El usuario ha sido eliminado" },
+      });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res
+        .status(500)
+        .json({ status: "Error", payload: { message: error.message } });
     }
   }
 
   static async loginUser(req: Request, res: Response) {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email }).populate("role", {
+      role: 1,
+    });
     try {
-      const { email, password } = req.body;
-      const user = await User.findOne({ email });
-      if (!user) throw new CustomError("Usuario no encontrado", 404);
-      if (!user.verify) throw new CustomError("Debes verificar tu cuenta", 401);
+      if (!user) throw new CustomError("User not found.", 404);
+      if (!user.verify)
+        throw new CustomError("You must verify your account.", 401);
       const passwordOk = user.validatePassword(password);
-      if (!passwordOk) throw new CustomError("Credenciales inválidas", 401);
+      if (!passwordOk) throw new CustomError("Invalid credentials.", 401);
       const payload = {
         email: user.email,
         name: user.name,
         lastname: user.lastname,
         id: user.id,
+        role: user.role,
       };
       const token = generateToken(payload);
       res.cookie("token", token);
-      res
-        .status(201)
-        .json({ status: "Success", message: "Logueo correcto", token });
+      res.status(200).json({
+        status: "Success",
+        payload: { message: "Logueo correcto", user: payload, token },
+      });
     } catch (error) {
       res
         .status(error.code || 500)
-        .json({ status: "Error", message: error.message });
+        .json({ status: "Error", payload: { message: error.message } });
     }
   }
 
   static async secret(req: AuthRequest, res: Response) {
-    res.json(req.user);
+    res.status(200).json({ status: "Success", payload: req.user });
   }
 
   static async logoutUser(req: Request, res: Response) {
@@ -164,24 +187,115 @@ class UserController {
     try {
       const data = await dataToken(token);
       if (data === null) {
-        return res.status(500).json({ status: "Error", message: "Error" });
+        return res.status(500).json({
+          status: "Error",
+          payload: { message: "The token has expired." },
+        });
       }
       const { email } = data.user;
       const user = await User.findOne({ email });
       if (!user) {
         return res
           .status(400)
-          .json({ status: "Error", message: "Usuario no existe" });
+          .json({ status: "Error", message: "Username does not exist." });
       }
       user.verify = true;
       await user.save();
-      res
-        .status(200)
-        .json({ status: "Success", message: "Usuario verificado" });
+      res.status(200).json({
+        status: "Success",
+        payload: { message: "Verified user." },
+      });
     } catch (error) {
       res
         .status(error.code || 500)
-        .json({ status: "Error", message: error.message });
+        .json({ status: "Error", payload: { message: error.message } });
+    }
+  }
+
+  static async recoverPassword(req: Request, res: Response) {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) throw new CustomError("User not found.", 404);
+
+    try {
+      const token = generateTokenRecover(user);
+      const template = getTemplateRecover(user.username, token);
+      try {
+        await transporter.sendMail({
+          from: `The Perfect Mentor <perfect.mentor.p5@gmail.com>`,
+          to: email,
+          subject: "Recover password",
+          text: "...",
+          html: template,
+        });
+      } catch (error) {
+        res.status(500).json({ status: "Error", payload: { message: error } });
+      }
+
+      user.tokenRecover = token;
+      await user.save();
+
+      res.status(200).json({
+        status: "Success",
+        payload: { message: "Check your mailbox, please." },
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ status: "Error", payload: { message: error.message } });
+    }
+  }
+
+  static async authorizeChangePassword(req: Request, res: Response) {
+    const { token } = req.params;
+    try {
+      const data = await dataToken(token);
+      if (data === null) {
+        return res.status(500).json({
+          status: "Error",
+          payload: { message: "The token has expired." },
+        });
+      }
+      const { email } = data.user;
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res
+          .status(400)
+          .json({ status: "Error", message: "Username does not exist." });
+      }
+      if (user.tokenRecover !== token)
+        throw new CustomError("Token is not valid.", 404);
+      // user.tokenRecover = "";
+      // await user.save();
+      res.status(200).json({
+        status: "Success",
+        payload: { user, message: "Authorized to modify." },
+      });
+    } catch (error) {
+      res
+        .status(error.code || 500)
+        .json({ status: "Error", payload: { message: error.message } });
+    }
+  }
+
+  static async updatePassword(req: Request, res: Response) {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) throw new CustomError("User not found.", 404);
+    try {
+      const salt = await bcrypt.genSalt(10);
+      const passWordEncrypted = await bcrypt.hash(password, salt);
+      user.password = passWordEncrypted;
+      await user.save();
+      res.status(200).json({
+        status: "Success",
+        payload: { message: "Password changed successfully." },
+      });
+    } catch (error) {
+      res
+        .status(error.code || 500)
+        .json({ status: "Error", payload: { message: error.message } });
     }
   }
 }

@@ -32,9 +32,13 @@ class MatchController {
       userToMatch.matchReq = userToMatch.matchReq.concat(user._id);
       await user.save();
       await userToMatch.save();
-      res.status(201).json({ status: "Success", message: "Solicitud enviada" });
+      res
+        .status(201)
+        .json({ status: "Success", payload: { message: "Solicitud enviada" } });
     } catch (error) {
-      res.status(500).json({ status: "Error", message: error.message });
+      res
+        .status(500)
+        .json({ status: "Error", payload: { message: error.message } });
     }
   }
   static async matchResponse(req: Request, res: Response) {
@@ -73,7 +77,7 @@ class MatchController {
         );
         return res.status(200).json({
           status: "Success",
-          message: "Match aceptado correctamente.",
+          payload: { message: "Match aceptado correctamente." },
         });
       }
 
@@ -92,11 +96,14 @@ class MatchController {
       // Si se rechaza, se elimina de todas formas.
       await Match.findByIdAndRemove(match[0]._id);
 
-      res
-        .status(200)
-        .json({ status: "Success", message: "Match rechazado correctamente." });
+      res.status(200).json({
+        status: "Success",
+        payload: { message: "Match rechazado correctamente." },
+      });
     } catch (error) {
-      res.status(500).json({ status: "Error", message: error.message });
+      res
+        .status(500)
+        .json({ status: "Error", payload: { message: error.message } });
     }
   }
 }

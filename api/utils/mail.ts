@@ -20,12 +20,24 @@ const getTemplate = (userName: string, token: string) => {
   return `
   <div id="email___content">
     <h2>¡Hola ${userName}!</h2>
-    <p>Gracias por registrarte. Debes activar tu cuenta con el link a continuación</p>
+    <p>Thanks for signing up. You must activate your account with the link below.</p>
     <a
-        href="http://localhost:3001/auth/${token}"
+        href="http://localhost:3000/auth/${token}"
         target="_blank"
-    >Confirmar cuenta</a>
+    >Confirm account</a>
   </div>`;
 };
 
-export { transporter, getTemplate };
+const getTemplateRecover = (userName: string, token: string) => {
+  return `
+  <div id="email___content">
+  <h2>¡Hola ${userName}!</h2>
+  <p>Enter the following link to recover your password.</p>
+  <a
+      href="http://localhost:3000/change-password/${token}"
+      target="_blank"
+  >Change password</a>
+</div>`;
+};
+
+export { transporter, getTemplate, getTemplateRecover };

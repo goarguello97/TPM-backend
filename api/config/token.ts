@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const SECRET = process.env.SECRET
+const SECRET = process.env.SECRET;
 
 export function generateToken(payload: any) {
   const token = jwt.sign({ user: payload }, SECRET, { expiresIn: "1h" });
@@ -11,6 +11,11 @@ export function generateToken(payload: any) {
 }
 
 export function generateTokenRegister(payload: any) {
+  const token = jwt.sign({ user: payload }, SECRET, { expiresIn: "10h" });
+  return token;
+}
+
+export function generateTokenRecover(payload: any) {
   const token = jwt.sign({ user: payload }, SECRET, { expiresIn: "10h" });
   return token;
 }

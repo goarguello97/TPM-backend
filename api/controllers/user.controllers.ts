@@ -1,8 +1,20 @@
 import { Request, Response } from "express";
 import CustomError from "../helpers/customError";
 import User from "../models/User";
-import bcrypt from "bcrypt";
+import Photo from "../models/Photo";
 import Role from "../models/Role";
+import { v4 as uuid } from "uuid";
+import multer from "multer";
+import path from "path";
+import bcrypt from "bcrypt";
+import firebase from "../config/firebase.config";
+import {
+  getStorage,
+  ref,
+  getDownloadURL,
+  uploadBytesResumable,
+} from "firebase/storage";
+import { initializeApp } from "firebase/app";
 import {
   dataToken,
   generateToken,
@@ -11,6 +23,10 @@ import {
 } from "../config/token";
 import { AuthRequest } from "../interfaces/requestInterface";
 import { getTemplate, getTemplateRecover, transporter } from "../utils/mail";
+
+initializeApp(firebase.firebaseConfig);
+const storage = getStorage();
+export const upload = multer({ storage: multer.memoryStorage() });
 
 class UserController {
   static async getUsers(req: Request, res: Response) {
@@ -296,6 +312,58 @@ class UserController {
       res
         .status(error.code || 500)
         .json({ status: "Error", payload: { message: error.message } });
+    }
+  }
+
+  static async addAvatar(req: AuthRequest, res: Response) {
+    const file = req.file;
+    const { id } = req.body;
+
+    try {
+      if (!file) throw new CustomError("Image not exist.", 404);
+
+      const user = await User.findById(id);
+
+      const fileName = uuid() + path.extname(req.file?.originalname!);
+
+      const storageRef = ref(storage, `avatars/${fileName}`);
+
+      const metadata = {
+        contentType: req.file?.mimetype,
+      };
+
+      const snapshot = await uploadBytesResumable(
+        storageRef,
+        req.file?.buffer!,
+        metadata
+      );
+
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      const newPhoto = {
+        title: fileName,
+        imageUrl: downloadURL,
+      };
+
+      const photo = new Photo(newPhoto);
+      await photo.save();
+
+      user.avatar = photo._id;
+      await user.save();
+
+      console.log("File successfully uploaded");
+
+      res.status(200).json({
+        status: "Success",
+        payload: {
+          message: "File uploaded to firebase storage.",
+          name: req.file?.originalname,
+          type: req.file?.mimetype,
+          downloadURL: downloadURL,
+        },
+      });
+    } catch (error) {
+      res.status(400).send(error.message);
     }
   }
 }

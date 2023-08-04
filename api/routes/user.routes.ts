@@ -3,7 +3,7 @@ import { checkSchema } from "express-validator";
 import validateFields from "../middlewares/validateFields";
 import { user } from "../schemas/UserSchema";
 const userRouter = Router();
-import UserController from "../controllers/user.controllers";
+import UserController, { upload } from "../controllers/user.controllers";
 import verifyAuth from "../middlewares/verifyAuth";
 
 userRouter.post(
@@ -20,8 +20,13 @@ userRouter.post("/login", UserController.loginUser);
 userRouter.get("/me", verifyAuth, UserController.secret);
 userRouter.post("/logout", UserController.logoutUser);
 userRouter.get("/verify/:token", UserController.verifyUser);
-userRouter.post("/recover-pass", UserController.recoverPassword)
-userRouter.get("/access-pass/:token", UserController.authorizeChangePassword)
-userRouter.patch("/change-pass", UserController.updatePassword)
+userRouter.post("/recover-pass", UserController.recoverPassword);
+userRouter.get("/access-pass/:token", UserController.authorizeChangePassword);
+userRouter.patch("/change-pass", UserController.updatePassword);
+userRouter.patch(
+  "/add-avatar",
+  upload.single("image"),
+  UserController.addAvatar
+);
 
 export default userRouter;

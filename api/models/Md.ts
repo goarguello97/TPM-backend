@@ -7,7 +7,8 @@ const MdSchema = new Schema(
     message: { type: String, require: true },
     date: { type: Date, require: true },
   },
-  { versionKey: false }
+  { 
+    timestamps: true,versionKey: false }
 );
 
 export default model("MD", MdSchema);

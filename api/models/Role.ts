@@ -5,6 +5,7 @@ const RoleSchema = new Schema(
     role: String,
   },
   {
+    timestamps: true,
     versionKey: false,
   }
 );

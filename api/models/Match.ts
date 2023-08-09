@@ -13,7 +13,10 @@ const MatchSchema = new Schema<Match>(
     userMatch: { type: Schema.Types.ObjectId, ref: "User", require: true },
     accepted: { type: Boolean, default: false },
   },
-  { versionKey: false }
+  {
+    timestamps: true,
+    versionKey: false,
+  }
 );
 
 export default model("Match", MatchSchema);

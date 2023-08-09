@@ -24,6 +24,7 @@ const UserSchema = new Schema(
     tokenRecover: { type: String, default: "" },
   },
   {
+    timestamps: true,
     methods: {
       hash(password: string, salt: string) {
         return bcrypt.hashSync(password, salt);

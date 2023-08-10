@@ -117,7 +117,7 @@ class UserController {
 
   static async updateUser(req: Request, res: Response) {
     const body = req.body;
-    const { id } = req.query;
+    const { id } = req.body;
     try {
       if (req.body.password) {
         req.body.password = bcrypt.hashSync(
@@ -160,9 +160,11 @@ class UserController {
 
   static async loginUser(req: Request, res: Response) {
     const { email, password } = req.body;
-    const user = await User.findOne({ email }).populate("role", {
-      role: 1,
-    });
+    const user = await User.findOne({ email })
+      .populate("role", {
+        role: 1,
+      })
+      .populate("avatar", { imageUrl: 1 });
     try {
       if (!user) throw new CustomError("User not found.", 404);
       if (!user.verify)
@@ -175,6 +177,8 @@ class UserController {
         lastname: user.lastname,
         id: user.id,
         role: user.role,
+        dateOfBirth: user.dateOfBirth,
+        avatar: user.avatar,
       };
       const token = generateToken(payload);
       res.cookie("token", token);

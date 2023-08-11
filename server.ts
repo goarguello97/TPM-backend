@@ -4,8 +4,8 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import router from "./api/routes/index.routes";
 import connectDB from "./api/db";
-import createRoles from "./api/config/initialSetup";
 import cookieParser from "cookie-parser";
+import { createAvatarDefault, createRoles } from "./api/config/initialSetup";
 
 const corsOptions = {
   origin: "http://localhost:3000",
@@ -19,6 +19,7 @@ dotenv.config();
 const PORT = process.env.PORT || 3000;
 connectDB();
 createRoles();
+createAvatarDefault();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));

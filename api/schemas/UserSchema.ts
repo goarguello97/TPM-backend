@@ -47,6 +47,10 @@ export const user: Schema = {
         "Minimum 8 characters, one uppercase, one number and one special character",
       options: /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/,
     },
+    isLength: {
+      errorMessage: "Minimum 8 characters and maximum 30 characters",
+      options: { min: 8, max: 30 },
+    },
   },
   skills: {
     optional: { options: { checkFalsy: true } },

@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 const getTemplate = (userName: string, token: string) => {
   return `
   <div id="email___content">
-    <h2>¡Hola ${userName}!</h2>
+    <h2>¡Hi ${userName}!</h2>
     <p>Thanks for signing up. You must activate your account with the link below.</p>
     <a
         href="http://localhost:3000/auth/${token}"
@@ -31,7 +31,7 @@ const getTemplate = (userName: string, token: string) => {
 const getTemplateRecover = (userName: string, token: string) => {
   return `
   <div id="email___content">
-  <h2>¡Hola ${userName}!</h2>
+  <h2>¡Hi ${userName}!</h2>
   <p>Enter the following link to recover your password.</p>
   <a
       href="http://localhost:3000/change-password/${token}"

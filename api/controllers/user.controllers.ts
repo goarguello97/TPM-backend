@@ -13,6 +13,7 @@ import {
   ref,
   getDownloadURL,
   uploadBytesResumable,
+  deleteObject,
 } from "firebase/storage";
 import { initializeApp } from "firebase/app";
 import {
@@ -23,6 +24,7 @@ import {
 } from "../config/token";
 import { AuthRequest } from "../interfaces/requestInterface";
 import { getTemplate, getTemplateRecover, transporter } from "../utils/mail";
+import { VALUES } from "../constants/values";
 
 initializeApp(firebase.firebaseConfig);
 const storage = getStorage();
@@ -47,10 +49,7 @@ class UserController {
         .select("-password")
         .populate("avatar", { imageUrl: 1 })
         .populate("role", { role: 1 });
-      if (!user)
-        return res
-          .status(500)
-          .json({ status: "Error", error: "No existe el usuario." });
+      if (!user) throw new CustomError("User not found.", 404);
       res.status(200).json({ status: "Success", payload: { user } });
     } catch (error) {
       res
@@ -64,19 +63,20 @@ class UserController {
       req.body;
     const userEmail = await User.find({ email });
     const userUsername = await User.find({ username });
+    const defaultAvatar = await Photo.findOne({ title: "default" });
     try {
       if (userEmail.length > 0 && userUsername.length > 0)
-        throw new CustomError("El usuario y email ya existe.", 403);
+        throw new CustomError("The username and email already exist.", 403);
       // return res
       //   .status(403)
       //   .json({ status: "Error", message: "El usuario y email ya existe" });
       if (userUsername.length > 0)
-        throw new CustomError("El usuario ya existe.", 403);
+        throw new CustomError("The username already exist.", 403);
       // return res
       //   .status(403)
       //   .json({ status: "Error", message: "El usuario ya existe" });
       if (userEmail.length > 0)
-        throw new CustomError("El email ya existe.", 403);
+        throw new CustomError("The email already exist.", 403);
       // return res
       //   .status(403)
       //   .json({ status: "Error", message: "El email ya existe" });
@@ -91,23 +91,22 @@ class UserController {
         password: passWordEncrypted,
         role,
         dateOfBirth,
+        avatar: defaultAvatar._id,
       });
 
       const token = generateTokenRegister(newUser);
       const template = getTemplate(username, token);
 
-      try {
-        await transporter.sendMail({
-          from: `The Perfect Mentor <perfect.mentor.p5@gmail.com>`,
-          to: email,
-          subject: "Verify email",
-          text: "...",
-          html: template,
-        });
-      } catch (error) {
-        res.status(500).json({ status: "Error", payload: { message: error } });
-      }
+      await transporter.sendMail({
+        from: `The Perfect Mentor <perfect.mentor.p5@gmail.com>`,
+        to: email,
+        subject: "Verify email",
+        text: "...",
+        html: template,
+      });
+
       await newUser.save();
+
       res
         .status(201)
         .json({ status: "Success", payload: { message: "Usuario creado" } });
@@ -155,13 +154,16 @@ class UserController {
     const user = await User.findById(idUser);
     const role = await Role.findById(user.role);
     try {
-      if (!role) throw new CustomError("No existe rol especificado", 404);
+      if (!role) throw new CustomError("No role specified.", 404);
       if (role.role !== "ADMIN")
-        throw new CustomError("No tiene los permisos necesarios", 404);
+        throw new CustomError(
+          "You do not have the necessary permissions.",
+          404
+        );
       await User.findByIdAndDelete(idUserToDelete);
       res.status(200).json({
         status: "Success",
-        payload: { message: "El usuario ha sido eliminado" },
+        payload: { message: "The user has been removed." },
       });
     } catch (error) {
       res
@@ -196,7 +198,7 @@ class UserController {
       res.cookie("token", token);
       res.status(200).json({
         status: "Success",
-        payload: { message: "Logueo correcto", user: payload, token },
+        payload: { message: "Login correct.", user: payload, token },
       });
     } catch (error) {
       res
@@ -338,11 +340,32 @@ class UserController {
     try {
       if (!file) throw new CustomError("Image not exist.", 404);
 
-      const user = await User.findById(id).populate("avatar", { imageUrl: 1 });
-      const oldPhoto = await Photo.findByIdAndDelete(user.avatar._id);
+      const user = await User.findById(id).populate("avatar", {
+        imageUrl: 1,
+      });
+      {
+        /* Si el usuario tiene avatar procedo por aca */
+      }
+      if (user.avatar) {
+        const oldPhoto = await Photo.findById(user.avatar._id);
+        {
+          /* Borro el avatar antiguo de firebase */
+        }
+        if (oldPhoto.title !== VALUES.DEFAULT) {
+          const fileToRemove = ref(storage, `avatars/${oldPhoto.title}`);
+          const deletingPhoto = await deleteObject(fileToRemove);
+          {
+            /* Borro la referencia de mongo */
+          }
+          await oldPhoto.deleteOne();
+        }
+      }
 
       const fileName = uuid() + path.extname(req.file?.originalname!);
 
+      {
+        /* Continua la carga normal del nuevo archivo */
+      }
       const storageRef = ref(storage, `avatars/${fileName}`);
 
       const metadata = {
@@ -380,6 +403,7 @@ class UserController {
         },
       });
     } catch (error) {
+      console.log(error);
       res.status(400).send(error.message);
     }
   }

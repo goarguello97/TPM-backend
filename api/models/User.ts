@@ -20,7 +20,10 @@ const UserSchema = new Schema(
     match: [{ type: Schema.Types.ObjectId, ref: "User" }],
     verify: { type: Boolean, default: false },
     skills: [String],
-    avatar: { type: Schema.Types.ObjectId, ref: "Photo" },
+    avatar: {
+      type: Schema.Types.ObjectId,
+      ref: "Photo",
+    },
     tokenRecover: { type: String, default: "" },
   },
   {

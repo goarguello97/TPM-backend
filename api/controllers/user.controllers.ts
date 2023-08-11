@@ -43,7 +43,10 @@ class UserController {
   static async getUser(req: Request, res: Response) {
     const { id } = req.query;
     try {
-      const user = await User.findById(id);
+      const user = await User.findById(id)
+        .select("-password")
+        .populate("avatar", { imageUrl: 1 })
+        .populate("role", { role: 1 });
       if (!user)
         return res
           .status(500)
@@ -117,19 +120,28 @@ class UserController {
 
   static async updateUser(req: Request, res: Response) {
     const body = req.body;
-    const { id } = req.body;
+    const { _id } = req.body;
+    const { password } = req.body;
     try {
-      if (req.body.password) {
+      let updatedUser;
+      if (password.length === 0) {
+        const { password, ...body } = req.body;
+        updatedUser = await User.findByIdAndUpdate(_id, body, {
+          new: true,
+        });
+      } else {
         req.body.password = bcrypt.hashSync(
           req.body.password,
           bcrypt.genSaltSync(10)
         );
+        updatedUser = await User.findByIdAndUpdate(_id, body, {
+          new: true,
+        });
       }
-      const updatedUser = await User.findByIdAndUpdate(id, body, { new: true });
-      if (!updatedUser) throw new CustomError("El usuario no existe", 404);
+      if (!updatedUser) throw new CustomError("User not found.", 404);
       res.status(200).json({
         status: "Success",
-        payload: { user: updatedUser, message: "Usuario actualizado" },
+        payload: { user: updatedUser, message: "User updated." },
       });
     } catch (error) {
       res
@@ -326,7 +338,8 @@ class UserController {
     try {
       if (!file) throw new CustomError("Image not exist.", 404);
 
-      const user = await User.findById(id);
+      const user = await User.findById(id).populate("avatar", { imageUrl: 1 });
+      const oldPhoto = await Photo.findByIdAndDelete(user.avatar._id);
 
       const fileName = uuid() + path.extname(req.file?.originalname!);
 

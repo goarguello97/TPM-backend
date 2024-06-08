@@ -1,0 +1,23 @@
+{
+  "name": "tpm-backend",
+  "version": "1.0.0",
+  "description": "Backend for web app, for search to the perfect mentor.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goarguello97/TPM-backend.git"
+  },
+  "author": "Gonzalo Argüello",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/goarguello97/TPM-backend/issues"
+  },
+  "homepage": "https://github.com/goarguello97/TPM-backend#readme",
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "typescript": "^5.4.5"
+  }
+}

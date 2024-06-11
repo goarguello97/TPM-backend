@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import RoleService from "../services/roles";
+import RoleService from "../services/RoleServices";
 
 export default class RoleController {
   static async getRoles(req: Request, res: Response) {

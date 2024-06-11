@@ -3,7 +3,13 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: ".env" });
 
-const DB_URI = process.env.DB_URI as string;
+let DB_URI: string;
+
+if (process.env.NODE_ENV === "test") {
+  DB_URI = process.env.DB_URI_TEST as string;
+} else {
+  DB_URI = process.env.DB_URI as string;
+}
 
 mongoose.set("strictQuery", true);
 

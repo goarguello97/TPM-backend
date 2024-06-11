@@ -31,6 +31,8 @@ app.get("/", (req, res) => {
 
 app.use("/api", router);
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   return console.log(`Server listenning on port ${PORT}`);
 });
+
+export { app, server };

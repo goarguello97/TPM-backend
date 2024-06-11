@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import connectDB from "./db";
+import router from "./routes/index.routes";
+import { createRoles } from "./config/initialSetup";
 
 const corsOptions = {
   origin: "http://localhost:3000",
@@ -16,6 +18,7 @@ const app = express();
 dotenv.config();
 const PORT = process.env.PORT || 3000;
 connectDB();
+createRoles();
 
 app.use(express.json());
 app.use(cors(corsOptions));
@@ -26,6 +29,10 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-app.listen(PORT, () => {
+app.use("/api", router);
+
+const server = app.listen(PORT, () => {
   return console.log(`Server listenning on port ${PORT}`);
 });
+
+export { app, server };

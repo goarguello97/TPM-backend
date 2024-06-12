@@ -45,7 +45,7 @@ describe("GET /users/:id", () => {
     const response = await request(app).get(`/api/users/${unknowId}`);
 
     expect(response.status).toBe(404);
-    expect(response.body.message).toBe("Usuario no encontrado,");
+    expect(response.body.message).toBe("Usuario no encontrado.");
   });
 });
 

@@ -18,6 +18,20 @@ export default class UserServices {
     }
   }
 
+  static async getById(id: string) {
+    try {
+      const user = await User.findById(id)
+        .select("-password")
+        .populate("avatar", { imageUrl: 1 })
+        .populate("role", { role: 1 });
+
+      if (!user) throw new CustomError("Usuario no encontrado.", 404);
+      return { error: false, data: user };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
+
   static async addUser(user: IRegisterUser) {
     const { username, name, lastname, email, password, role, dateOfBirth } =
       user;

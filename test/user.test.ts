@@ -39,7 +39,7 @@ describe("POST /users", () => {
     };
     const response = await request(app).post("/api/users").send(user);
     expect(response.status).toBe(400);
-    expect(response.body.message).toBe("El email es requerido.");
+    expect(response.body.error).toBe('El correo electrónico es obligatorio.');
   });
 
   it("should not create a user if there are missing fields.(password)", async () => {
@@ -49,7 +49,7 @@ describe("POST /users", () => {
     };
     const response = await request(app).post("/api/users").send(user);
     expect(response.status).toBe(400);
-    expect(response.body.message).toBe("La contraseña es requerida.");
+    expect(response.body.error).toBe("La contraseña es requerida.");
   });
 
   it("should create a user", async () => {

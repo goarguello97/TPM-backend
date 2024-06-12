@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import connectDB from "./db";
 import router from "./routes/index.routes";
-import { createRoles } from "./config/initialSetup";
+import { createAvatarDefault, createRoles } from "./config/initialSetup";
 
 const corsOptions = {
   origin: "http://localhost:3000",
@@ -18,6 +18,7 @@ const app = express();
 dotenv.config();
 const PORT = process.env.PORT || 3000;
 connectDB();
+createAvatarDefault();
 createRoles();
 
 app.use(express.json());

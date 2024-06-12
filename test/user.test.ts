@@ -39,7 +39,7 @@ describe("POST /users", () => {
     };
     const response = await request(app).post("/api/users").send(user);
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe('El correo electrónico es obligatorio.');
+    expect(response.body.error).toBe("El correo electrónico es obligatorio.");
   });
 
   it("should not create a user if there are missing fields.(password)", async () => {
@@ -55,7 +55,7 @@ describe("POST /users", () => {
   it("should create a user", async () => {
     const user = {
       username: "fulanito",
-      email: "email@email.com",
+      email: "haxine1712@lapeds.com",
       password: "Pass-1234",
     };
     const response = await request(app).post("/api/users").send(user);

@@ -1,8 +1,11 @@
+import { generateTokenRegister } from "../config/token";
 import CustomError from "../helpers/customError";
 import Photo from "../models/Photo";
 import User from "../models/User";
 import bcrypt from "bcrypt";
+import { getTemplate, transporter } from "../utils/mail";
 
+const EMAIL = process.env.EMAIL;
 export default class UserServices {
   static async getUsers() {
     try {
@@ -43,6 +46,18 @@ export default class UserServices {
         password: passwordEncrypted,
         role,
         dateOfBirth,
+        avatar: defaultAvatar?._id,
+      });
+
+      const token = generateTokenRegister(newUser);
+      const template = getTemplate(username, token);
+
+      await transporter.sendMail({
+        from: `The Perfect Mentor <${EMAIL}>`,
+        to: email,
+        subject: "Verificar cuenta",
+        text: "...",
+        html: template,
       });
 
       await newUser.save();

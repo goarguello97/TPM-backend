@@ -4,6 +4,7 @@ import Photo from "../models/Photo";
 import User from "../models/User";
 import bcrypt from "bcrypt";
 import { getTemplate, transporter } from "../utils/mail";
+import { IRegisterUser } from "../interfaces/IRegisterUser";
 
 const EMAIL = process.env.EMAIL;
 export default class UserServices {
@@ -17,7 +18,7 @@ export default class UserServices {
     }
   }
 
-  static async addUser(user: any) {
+  static async addUser(user: IRegisterUser) {
     const { username, name, lastname, email, password, role, dateOfBirth } =
       user;
     const userEmail = await User.find({ email });

@@ -11,7 +11,9 @@ class ValidationErrors {
 const validateFields = (req: Request, res: Response, next: NextFunction) => {
   const { errors } = new ValidationErrors().service(req);
   if (errors.length !== 0)
-    return res.status(400).json({ errorsLength: errors.length, errors });
+    return res
+      .status(400)
+      .json({ errorsLength: errors.length, error: errors[0].msg });
   next();
 };
 

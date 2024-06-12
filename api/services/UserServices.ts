@@ -24,11 +24,17 @@ export default class UserServices {
         .select("-password")
         .populate("avatar", { imageUrl: 1 })
         .populate("role", { role: 1 });
-
       if (!user) throw new CustomError("Usuario no encontrado.", 404);
       return { error: false, data: user };
     } catch (error) {
-      return { error: true, data: error };
+      if (error instanceof CustomError) {
+        return {
+          error: true,
+          data: { code: error.code, message: error.message },
+        };
+      } else {
+        return { error: true, data: error };
+      }
     }
   }
 

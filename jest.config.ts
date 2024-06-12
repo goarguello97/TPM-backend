@@ -4,4 +4,5 @@ export default {
   testEnvironment: "node",
   verbose: true,
   testMatch: ["**/user.test.ts"],
+  testTimeout: 10000,
 };

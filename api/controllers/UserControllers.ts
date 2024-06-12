@@ -12,14 +12,14 @@ export default class UserController {
   static async getById(req: Request, res: Response) {
     const { id } = req.params;
     const { error, data } = await UserServices.getById(id);
-    if (error) return res.status(400).json(error);
+    if (error) return res.status(404).json(data);
 
     res.status(200).json(data);
   }
 
   static async addUser(req: Request, res: Response) {
     const { error, data } = await UserServices.addUser(req.body);
-    if (error) return res.status(400).json(error);
+    if (error) return res.status(409).json(error);
 
     res.status(201).json(data);
   }

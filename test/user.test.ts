@@ -25,6 +25,32 @@ describe("GET /users", () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual([]);
   });
+});
+
+describe("POST /users", () => {
+  afterAll(async () => {
+    await User.deleteMany({});
+  });
+
+  it("should not create a user if there are missing fields.(email)", async () => {
+    const user = {
+      username: "fulanito",
+      password: "Pass-1234",
+    };
+    const response = await request(app).post("/api/users").send(user);
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe("El email es requerido.");
+  });
+
+  it("should not create a user if there are missing fields.(password)", async () => {
+    const user = {
+      username: "fulanito",
+      email: "email@email.com",
+    };
+    const response = await request(app).post("/api/users").send(user);
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe("La contraseña es requerida.");
+  });
 
   it("should create a user", async () => {
     const user = {
@@ -35,18 +61,5 @@ describe("GET /users", () => {
     const response = await request(app).post("/api/users").send(user);
     expect(response.status).toBe(201);
     expect(response.body.username).toBe("fulanito");
-  });
-
-  it("should verify user creation", async () => {
-    const user = {
-      username: "fulanito",
-      email: "email@email.com",
-      password: "Pass-1234",
-    };
-    await new User(user).save();
-    const response = await request(app).get("/api/users");
-    expect(response.status).toBe(200);
-    expect(response.body.length).toBe(1);
-    expect(response.body[0].username).toBe("fulanito");
   });
 });

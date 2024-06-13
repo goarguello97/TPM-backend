@@ -5,6 +5,7 @@ import User from "../models/User";
 import bcrypt from "bcrypt";
 import { getTemplate, transporter } from "../utils/mail";
 import { IRegisterUser } from "../interfaces/IRegisterUser";
+import Role from "../models/Role";
 
 const EMAIL = process.env.EMAIL;
 export default class UserServices {
@@ -109,6 +110,33 @@ export default class UserServices {
       }
       if (!userUpdated) throw new CustomError("Usuario no encontrado.", 404);
       return { error: false, data: userUpdated };
+    } catch (error) {
+      if (error instanceof CustomError) {
+        return {
+          error: true,
+          data: { message: error.message, code: error.code },
+        };
+      }
+      return { error: true, data: error };
+    }
+  }
+
+  static async deleteUser(idAdmin: string, idUserToDelete: string) {
+    const possibleAdmin = await User.findById(idAdmin);
+    const role = await Role.findById(possibleAdmin?.role);
+
+    try {
+      if (!role) {
+        console.log(role);
+        throw new CustomError("Rol no especifícado.", 404);
+      }
+      if (role.role !== "ADMIN")
+        throw new CustomError("No posees los permisos necesarios.", 404);
+      await User.findByIdAndDelete(idUserToDelete);
+      return {
+        error: false,
+        data: { message: "Usuario eliminado satisfacoriamente." },
+      };
     } catch (error) {
       if (error instanceof CustomError) {
         return {

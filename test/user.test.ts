@@ -193,16 +193,24 @@ describe("PUT /users", () => {
 
 describe("DELETE /users", () => {
   let userAdmin: IUser;
+  let userMentor: IUser;
   let randomUser: IUser;
   let randomId = "507f1f77bcf86cd799439011";
   beforeAll(async () => {
     await User.deleteMany({});
     const adminRole = await Role.findOne({ role: "ADMIN" });
+    const mentorRole = await Role.findOne({ role: "MENTOR" });
     const userToAdmin = {
       username: "admin",
       email: "admin@admin.com",
       password: "Pass-1234",
       role: adminRole?._id,
+    };
+    const userToMentor = {
+      username: "mentor",
+      email: "mentor@mentor.com",
+      password: "Pass-1234",
+      role: mentorRole?._id,
     };
     const userToRandom = {
       username: "fulanito",
@@ -210,13 +218,23 @@ describe("DELETE /users", () => {
       password: "Pass-1234",
     };
     userAdmin = await User.create(userToAdmin);
+    userMentor = await User.create(userToMentor);
     randomUser = await User.create(userToRandom);
   });
 
-  it("should cannot delete user if the incorrect an admin id is provided", async () => {
+  it("should cannot delete user if the role is not specified", async () => {
     const response = await request(app)
       .delete("/api/users")
       .send({ idAdmin: randomId, idUserToDelete: randomUser._id });
+
+    expect(response.status).toBe(404);
+    expect(response.body.message).toEqual("Rol no especifícado.");
+  });
+
+  it("should cannot delete user if the role not corresponding an admin", async () => {
+    const response = await request(app)
+      .delete("/api/users")
+      .send({ idAdmin: userMentor._id, idUserToDelete: randomUser._id });
 
     expect(response.status).toBe(404);
     expect(response.body.message).toEqual("No posees los permisos necesarios.");
@@ -227,7 +245,7 @@ describe("DELETE /users", () => {
       .delete("/api/users")
       .send({ idAdmin: userAdmin._id, idUserToDelete: randomUser._id });
 
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(200);
     expect(response.body.message).toEqual(
       "Usuario eliminado satisfacoriamente."
     );

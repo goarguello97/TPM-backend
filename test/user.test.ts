@@ -3,6 +3,7 @@ import { app } from "../api/server";
 import dotenv from "dotenv";
 import User from "../api/models/User";
 import Role from "../api/models/Role";
+import { IUser } from "../api/interfaces/IUser";
 
 dotenv.config();
 
@@ -191,8 +192,8 @@ describe("PUT /users", () => {
 });
 
 describe("DELETE /users", () => {
-  let userAdmin;
-  let randomUser;
+  let userAdmin: IUser;
+  let randomUser: IUser;
   let randomId = "507f1f77bcf86cd799439011";
   beforeAll(async () => {
     await User.deleteMany({});

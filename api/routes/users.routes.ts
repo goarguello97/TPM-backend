@@ -13,6 +13,7 @@ userRouter.post(
   validateFields,
   UserController.addUser
 );
-userRouter.get("/:id", UserController.getById)
+userRouter.get("/:id", UserController.getById);
+userRouter.put("/:id", UserController.putUser);
 
 export default userRouter;

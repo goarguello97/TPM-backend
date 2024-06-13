@@ -2,7 +2,6 @@ import request from "supertest";
 import { app } from "../api/server";
 import dotenv from "dotenv";
 import User from "../api/models/User";
-import { ObjectId } from "mongoose";
 
 dotenv.config();
 
@@ -139,5 +138,53 @@ describe("POST /users", () => {
     expect(response.body.error).toBe(
       "El correo electrónico haxine1712@lapeds.com actualmente está en uso."
     );
+  });
+});
+
+describe("PUT /users", () => {
+  let id = "" as string;
+  let randomId = "507f1f77bcf86cd799439011";
+  let username = "" as string;
+
+  beforeAll(async () => {
+    await User.deleteMany({});
+    const user = await User.create({
+      username: "fulanito",
+      email: "haxine1712@lapeds.com",
+      password: "Pass-1234",
+    });
+
+    id = user._id.toString();
+    username = user.username;
+  });
+
+  afterAll(async () => {
+    await User.deleteMany({});
+  });
+
+  it("should modify their name of original user", async () => {
+    const user = { username: "cosme" };
+
+    const response = await request(app).put(`/api/users/${id}`).send(user);
+    expect(response.status).toBe(200);
+    expect(response.body.username).toEqual("cosme");
+  });
+
+  it("should modify their email of original user", async () => {
+    const user = { email: "cambio@email.com" };
+
+    const response = await request(app).put(`/api/users/${id}`).send(user);
+    expect(response.status).toBe(200);
+    expect(response.body.email).toEqual("cambio@email.com");
+  });
+
+  it("should cannot modify their username for incorrect id", async () => {
+    const user = { username: "cosme" };
+
+    const response = await request(app)
+      .put(`/api/users/${randomId}`)
+      .send(user);
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe("Usuario no encontrado.");
   });
 });

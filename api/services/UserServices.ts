@@ -107,9 +107,15 @@ export default class UserServices {
           new: true,
         }).select("-password");
       }
+      if (!userUpdated) throw new CustomError("Usuario no encontrado.", 404);
       return { error: false, data: userUpdated };
     } catch (error) {
-      console.log(error);
+      if (error instanceof CustomError) {
+        return {
+          error: true,
+          data: { message: error.message, code: error.code },
+        };
+      }
       return { error: true, data: error };
     }
   }

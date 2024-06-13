@@ -28,7 +28,7 @@ export default class UserController {
     const { id } = req.params;
     const user = req.body;
     const { error, data } = await UserServices.putUser(id, user);
-    if (error) return res.status(404).json(error);
+    if (error) return res.status(404).json(data);
 
     return res.status(200).json(data);
   }

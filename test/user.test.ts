@@ -2,6 +2,7 @@ import request from "supertest";
 import { app } from "../api/server";
 import dotenv from "dotenv";
 import User from "../api/models/User";
+import Role from "../api/models/Role";
 
 dotenv.config();
 
@@ -186,5 +187,48 @@ describe("PUT /users", () => {
       .send(user);
     expect(response.status).toBe(404);
     expect(response.body.message).toBe("Usuario no encontrado.");
+  });
+});
+
+describe("DELETE /users", () => {
+  let userAdmin;
+  let randomUser;
+  let randomId = "507f1f77bcf86cd799439011";
+  beforeAll(async () => {
+    await User.deleteMany({});
+    const adminRole = await Role.findOne({ role: "ADMIN" });
+    const userToAdmin = {
+      username: "admin",
+      email: "admin@admin.com",
+      password: "Pass-1234",
+      role: adminRole?._id,
+    };
+    const userToRandom = {
+      username: "fulanito",
+      email: "haxine1712@lapeds.com",
+      password: "Pass-1234",
+    };
+    userAdmin = await User.create(userToAdmin);
+    randomUser = await User.create(userToRandom);
+  });
+
+  it("should cannot delete user if the incorrect an admin id is provided", async () => {
+    const response = await request(app)
+      .DELETE("/api/users")
+      .send({ idAdmin: randomId, idUserToDelete: randomUser._id });
+
+    expect(response.status).toBe(404);
+    expect(response.body.message).toEqual("No posees los permisos necesarios.");
+  });
+
+  it("should delete user if an admin id is provided", async () => {
+    const response = await request(app)
+      .DELETE("/api/users")
+      .send({ idAdmin: userAdmin._id, idUserToDelete: randomUser._id });
+
+    expect(response.status).toBe(204);
+    expect(response.body.message).toEqual(
+      "Usuario eliminado satisfacoriamente."
+    );
   });
 });

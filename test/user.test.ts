@@ -143,6 +143,7 @@ describe("POST /users", () => {
 
 describe("PUT /users", () => {
   let id = "" as string;
+  let randomId = "507f1f77bcf86cd799439011";
   let username = "" as string;
 
   beforeAll(async () => {
@@ -175,5 +176,15 @@ describe("PUT /users", () => {
     const response = await request(app).put(`/api/users/${id}`).send(user);
     expect(response.status).toBe(200);
     expect(response.body.email).toEqual("cambio@email.com");
+  });
+
+  it("should cannot modify their username for incorrect id", async () => {
+    const user = { username: "cosme" };
+
+    const response = await request(app)
+      .put(`/api/users/${randomId}`)
+      .send(user);
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe("Usuario no encontrado.");
   });
 });

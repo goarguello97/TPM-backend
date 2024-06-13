@@ -126,7 +126,10 @@ export default class UserServices {
     const role = await Role.findById(possibleAdmin?.role);
 
     try {
-      if (!role) throw new CustomError("Rol no especifícado.", 404);
+      if (!role) {
+        console.log(role);
+        throw new CustomError("Rol no especifícado.", 404);
+      }
       if (role.role !== "ADMIN")
         throw new CustomError("No posees los permisos necesarios.", 404);
       await User.findByIdAndDelete(idUserToDelete);

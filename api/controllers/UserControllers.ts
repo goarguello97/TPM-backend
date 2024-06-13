@@ -42,6 +42,6 @@ export default class UserController {
     );
     if (error) return res.status(404).json(data);
 
-    return res.status(209).json(data);
+    return res.status(204).json(data);
   }
 }

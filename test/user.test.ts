@@ -215,7 +215,7 @@ describe("DELETE /users", () => {
 
   it("should cannot delete user if the incorrect an admin id is provided", async () => {
     const response = await request(app)
-      .DELETE("/api/users")
+      .delete("/api/users")
       .send({ idAdmin: randomId, idUserToDelete: randomUser._id });
 
     expect(response.status).toBe(404);
@@ -224,7 +224,7 @@ describe("DELETE /users", () => {
 
   it("should delete user if an admin id is provided", async () => {
     const response = await request(app)
-      .DELETE("/api/users")
+      .delete("/api/users")
       .send({ idAdmin: userAdmin._id, idUserToDelete: randomUser._id });
 
     expect(response.status).toBe(204);

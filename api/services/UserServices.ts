@@ -127,7 +127,7 @@ export default class UserServices {
 
     try {
       if (!role) throw new CustomError("Rol no especifícado.", 404);
-      if (role.role === "ADMIN")
+      if (role.role !== "ADMIN")
         throw new CustomError("No posees los permisos necesarios.", 404);
       await User.findByIdAndDelete(idUserToDelete);
       return {

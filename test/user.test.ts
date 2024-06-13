@@ -146,7 +146,7 @@ describe("PUT /users", () => {
   let username = "" as string;
 
   beforeAll(async () => {
-    await User.deleteMany({})
+    await User.deleteMany({});
     const user = await User.create({
       username: "fulanito",
       email: "haxine1712@lapeds.com",
@@ -167,5 +167,13 @@ describe("PUT /users", () => {
     const response = await request(app).put(`/api/users/${id}`).send(user);
     expect(response.status).toBe(200);
     expect(response.body.username).toEqual("cosme");
+  });
+
+  it("should modify their email of original user", async () => {
+    const user = { email: "cambio@email.com" };
+
+    const response = await request(app).put(`/api/users/${id}`).send(user);
+    expect(response.status).toBe(200);
+    expect(response.body.email).toEqual("cambio@email.com");
   });
 });

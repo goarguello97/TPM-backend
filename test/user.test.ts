@@ -146,6 +146,7 @@ describe("PUT /users", () => {
   let username = "" as string;
 
   beforeAll(async () => {
+    await User.deleteMany({})
     const user = await User.create({
       username: "fulanito",
       email: "haxine1712@lapeds.com",

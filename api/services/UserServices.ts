@@ -89,4 +89,28 @@ export default class UserServices {
       return { error: true, data: error };
     }
   }
+
+  static async putUser(id: string, user: IRegisterUser) {
+    const { password } = user;
+    let userUpdated;
+    try {
+      if (password === undefined) {
+        userUpdated = await User.findByIdAndUpdate(id, user, {
+          new: true,
+        }).select("-password");
+      } else {
+        const salt = await bcrypt.genSalt(10);
+        const passwordEncrypted = await bcrypt.hash(password, salt);
+
+        user.password = passwordEncrypted;
+        userUpdated = await User.findByIdAndUpdate(id, user, {
+          new: true,
+        }).select("-password");
+      }
+      return { error: false, data: userUpdated };
+    } catch (error) {
+      console.log(error);
+      return { error: true, data: error };
+    }
+  }
 }

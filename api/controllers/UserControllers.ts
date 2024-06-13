@@ -32,4 +32,16 @@ export default class UserController {
 
     return res.status(200).json(data);
   }
+
+  static async deleteUser(req: Request, res: Response) {
+    const { idAdmin, idUserToDelete } = req.body;
+
+    const { error, data } = await UserServices.deleteUser(
+      idAdmin,
+      idUserToDelete
+    );
+    if (error) return res.status(404).json(data);
+
+    return res.status(209).json(data);
+  }
 }

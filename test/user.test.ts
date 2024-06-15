@@ -11,6 +11,7 @@ process.env.NODE_ENV = "test";
 
 beforeAll(async () => {
   await app.locals.connectDB;
+  await User.deleteMany();
 });
 
 afterAll(async () => {
@@ -21,7 +22,7 @@ describe("GET /users/:id", () => {
   let id = "" as string;
   let username = "" as string;
   let unknowId = "507f1f77bcf86cd799439011" as string;
-  beforeEach(async () => {
+  beforeAll(async () => {
     const user = await User.create({
       username: "fulanito",
       email: "haxine1712@lapeds.com",

@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import User from "../api/models/User";
 import Role from "../api/models/Role";
 import { IUser } from "../api/interfaces/IUser";
+import FirebaseService from "../api/services/FirebaseServices";
 
 dotenv.config();
 
@@ -83,7 +84,7 @@ describe("GET /users", () => {
 
 describe("POST /users", () => {
   beforeAll(async () => {
-    await User.deleteMany({});
+    await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
   });
 
   it("should not create a user if there are missing fields.(email)", async () => {

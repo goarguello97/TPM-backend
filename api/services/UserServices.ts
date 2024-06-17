@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import { getTemplate, transporter } from "../utils/mail";
 import { IRegisterUser } from "../interfaces/IRegisterUser";
 import Role from "../models/Role";
+import FirebaseService from "./FirebaseServices";
 
 const EMAIL = process.env.EMAIL;
 export default class UserServices {
@@ -82,6 +83,7 @@ export default class UserServices {
         html: template,
       });
 
+      await FirebaseService.addUserFirebase(email, username, password);
       await newUser.save();
 
       return { error: false, data: newUser };
@@ -127,7 +129,6 @@ export default class UserServices {
 
     try {
       if (!role) {
-        console.log(role);
         throw new CustomError("Rol no especifícado.", 404);
       }
       if (role.role !== "ADMIN")

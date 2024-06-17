@@ -1,6 +1,20 @@
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import admin, { ServiceAccount } from "firebase-admin";
 import dotenv from "dotenv";
 
-dotenv.config({ path: ".env" });
+const env = process.env.NODE_ENV;
+
+const serviceAccount: ServiceAccount =
+  env === "test"
+    ? require("../../serviceAccountKey.dev.json")
+    : require("../../serviceAccountKey.prod.json");
+
+if (env === "test") {
+  dotenv.config({ path: ".env.development" });
+} else {
+  dotenv.config({ path: ".env" });
+}
 
 const {
   API_KEY,
@@ -11,13 +25,21 @@ const {
   APP_ID,
 } = process.env;
 
-export default {
-  firebaseConfig: {
-    apiKey: API_KEY,
-    authDomain: AUTH_DOMAIN,
-    projectId: PROJECT_ID,
-    storageBucket: STORAGE_BUCKET,
-    messagingSenderId: MESSAGING_SENDER_ID,
-    appId: APP_ID,
-  },
+const firebaseConfig = {
+  apiKey: API_KEY,
+  authDomain: AUTH_DOMAIN,
+  projectId: PROJECT_ID,
+  storageBucket: STORAGE_BUCKET,
+  messagingSenderId: MESSAGING_SENDER_ID,
+  appId: APP_ID,
 };
+
+export const firestoreApp = initializeApp(firebaseConfig);
+export const firestoreDB = getFirestore(firestoreApp);
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+});
+
+export const auth = admin.auth();
+export const firestoreAdmin = admin.firestore();

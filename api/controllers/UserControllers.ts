@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import UserServices from "../services/UserServices";
+import CustomError from "../helpers/customError";
 
 export default class UserController {
   static async getUsers(req: Request, res: Response) {
@@ -40,6 +41,19 @@ export default class UserController {
       idAdmin,
       idUserToDelete
     );
+    if (error) return res.status(404).json(data);
+
+    return res.status(200).json(data);
+  }
+
+  static async addAvatar(req: Request, res: Response) {
+    const file = req.file;
+    const { id } = req.body;
+
+    if (!file) throw new CustomError("No ingreso una foto.", 404);
+
+    const { error, data } = await UserServices.addAvatar(file, id);
+
     if (error) return res.status(404).json(data);
 
     return res.status(200).json(data);

@@ -6,7 +6,16 @@ import bcrypt from "bcrypt";
 import { getTemplate, transporter } from "../utils/mail";
 import { IRegisterUser } from "../interfaces/IRegisterUser";
 import Role from "../models/Role";
+import { v4 as uuid } from "uuid";
+import path from "path";
 import FirebaseService from "./FirebaseServices";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
+import { storage } from "../config/firebase";
 
 const EMAIL = process.env.EMAIL;
 export default class UserServices {
@@ -146,6 +155,68 @@ export default class UserServices {
         };
       }
       return { error: true, data: error };
+    }
+  }
+
+  static async addAvatar(file: Express.Multer.File, id: string) {
+    try {
+      if (!file) throw new CustomError("Imagen no existe.", 404);
+
+      const user = await User.findById(id).populate("avatar", { imageUrl: 1 });
+
+      if (!user) throw new CustomError("Usuario no existe.", 404);
+
+      if (user.avatar) {
+        const oldPhoto = await Photo.findById(user.avatar._id);
+        if (!oldPhoto) throw new CustomError("Avatar no existe.", 404);
+
+        if (oldPhoto.title !== "default") {
+          const fileToRemove = ref(storage, `avatars/${oldPhoto?.title}`);
+          const deletingPhoto = await deleteObject(fileToRemove);
+          await oldPhoto.deleteOne();
+        }
+      }
+
+      const fileName = uuid() + path.extname(file.originalname!);
+
+      {
+        /* Continua la carga normal del nuevo archivo */
+      }
+      const storageRef = ref(storage, `avatars/${fileName}`);
+
+      const metadata = {
+        contentType: file.mimetype,
+      };
+
+      const snapshot = await uploadBytesResumable(
+        storageRef,
+        file.buffer!,
+        metadata
+      );
+
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      const newPhoto = {
+        title: fileName,
+        imageUrl: downloadURL,
+      };
+
+      const photo = new Photo(newPhoto);
+      await photo.save();
+
+      user.avatar = photo._id;
+      await user.save();
+
+      return { error: false, data: user };
+    } catch (error) {
+      if (error instanceof CustomError) {
+        return {
+          error: true,
+          data: { code: error.code, message: error.message },
+        };
+      } else {
+        return { error: true, data: error };
+      }
     }
   }
 }

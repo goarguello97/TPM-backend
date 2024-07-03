@@ -3,6 +3,7 @@ import { checkSchema } from "express-validator";
 import { UserSchema } from "../schemas/UserSchema";
 import validateFields from "../middlewares/validateFields";
 import UserController from "../controllers/UserControllers";
+import { upload } from "../config/firebase";
 
 const userRouter = Router();
 
@@ -16,5 +17,10 @@ userRouter.post(
 userRouter.get("/:id", UserController.getById);
 userRouter.put("/:id", UserController.putUser);
 userRouter.delete("/", UserController.deleteUser);
+userRouter.patch(
+  "/add/avatar",
+  upload.single("image"),
+  UserController.addAvatar
+);
 
 export default userRouter;

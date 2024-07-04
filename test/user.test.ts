@@ -284,10 +284,19 @@ describe("POST /login", () => {
     expect(response.body).toHaveProperty("email", "haxine1712@lapeds.com");
   });
 
-  it("should cannot login with incorrect credentials", async () => {
+  it("should cannot login with incorrect credentials(email)", async () => {
     const response = await request(app)
       .post("/api/users/login")
       .send({ email: "fulano@lapeds.com", password: "Pass-1234" });
+
+    expect(response.status).toBe(401);
+    expect(response.body.message).toBe("Credenciales inválidas.");
+  });
+
+  it("should cannot login with incorrect credentials(password)", async () => {
+    const response = await request(app)
+      .post("/api/users/login")
+      .send({ email: "haxine1712@lapeds.com", password: "Pass-12345" });
 
     expect(response.status).toBe(401);
     expect(response.body.message).toBe("Credenciales inválidas.");

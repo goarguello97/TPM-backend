@@ -22,5 +22,6 @@ userRouter.patch(
   upload.single("image"),
   UserController.addAvatar
 );
+userRouter.post("/login", UserController.login);
 
 export default userRouter;

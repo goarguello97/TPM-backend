@@ -15,7 +15,9 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
-import { storage } from "../config/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { loginAuth, storage } from "../config/firebase";
+import { FirebaseError } from "firebase/app";
 
 const EMAIL = process.env.EMAIL;
 export default class UserServices {
@@ -217,6 +219,22 @@ export default class UserServices {
       } else {
         return { error: true, data: error };
       }
+    }
+  }
+
+  static async login(email: string, password: string) {
+    try {
+      const { user } = await signInWithEmailAndPassword(
+        loginAuth,
+        email,
+        password
+      );
+      return { error: false, data: user };
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        return { error: true, data: error.code };
+      }
+      return { error: true, data: error };
     }
   }
 }

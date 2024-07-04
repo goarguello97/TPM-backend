@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import UserServices from "../services/UserServices";
 import CustomError from "../helpers/customError";
+import { FirebaseErrorCodes } from "../enum/firebaseCodesError";
 
 export default class UserController {
   static async getUsers(req: Request, res: Response) {
@@ -54,7 +55,24 @@ export default class UserController {
 
     const { error, data } = await UserServices.addAvatar(file, id);
 
-    if (error) return res.status(404).json(data);
+    if (error) {
+      return res.status(404).json(data);
+    }
+
+    return res.status(200).json(data);
+  }
+
+  static async login(req: Request, res: Response) {
+    const { email, password } = req.body;
+
+    const { error, data } = await UserServices.login(email, password);
+
+    if (error) {
+      if (data === FirebaseErrorCodes.INVALID_CREDENTIALS) {
+        return res.status(401).json({ message: "Credenciales inválidas." });
+      }
+      return res.status(401).json(data);
+    }
 
     return res.status(200).json(data);
   }

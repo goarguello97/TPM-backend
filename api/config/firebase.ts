@@ -1,7 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 import admin, { ServiceAccount } from "firebase-admin";
 import dotenv from "dotenv";
+import multer from "multer";
 
 const env = process.env.NODE_ENV;
 
@@ -41,5 +44,9 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
 });
 
+export const storage = getStorage();
+export const upload = multer({ storage: multer.memoryStorage() });
+
 export const auth = admin.auth();
+export const loginAuth = getAuth(firestoreApp);
 export const firestoreAdmin = admin.firestore();

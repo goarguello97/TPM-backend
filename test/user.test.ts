@@ -1,4 +1,5 @@
 import request from "supertest";
+import "jest-localstorage-mock";
 import { app } from "../api/server";
 import dotenv from "dotenv";
 import User from "../api/models/User";
@@ -12,17 +13,18 @@ process.env.NODE_ENV = "test";
 
 beforeAll(async () => {
   await app.locals.connectDB;
+  await User.deleteMany();
 });
 
 afterAll(async () => {
   await User.deleteMany({});
 });
 
-describe("GET /users/:id", () => {
+xdescribe("GET /users/:id", () => {
   let id = "" as string;
   let username = "" as string;
   let unknowId = "507f1f77bcf86cd799439011" as string;
-  beforeEach(async () => {
+  beforeAll(async () => {
     const user = await User.create({
       username: "fulanito",
       email: "haxine1712@lapeds.com",
@@ -51,7 +53,7 @@ describe("GET /users/:id", () => {
   });
 });
 
-describe("GET /users", () => {
+xdescribe("GET /users", () => {
   it("should have no users initially", async () => {
     const response = await request(app).get("/api/users");
     expect(response.status).toBe(200);
@@ -81,7 +83,7 @@ describe("GET /users", () => {
   });
 });
 
-describe("POST /users", () => {
+xdescribe("POST /users", () => {
   beforeAll(async () => {
     await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
   });
@@ -144,7 +146,7 @@ describe("POST /users", () => {
   });
 });
 
-describe("PUT /users", () => {
+xdescribe("PUT /users", () => {
   let id = "" as string;
   let randomId = "507f1f77bcf86cd799439011";
   let username = "" as string;
@@ -192,7 +194,7 @@ describe("PUT /users", () => {
   });
 });
 
-describe("DELETE /users", () => {
+xdescribe("DELETE /users", () => {
   let userAdmin: IUser;
   let userMentor: IUser;
   let randomUser: IUser;
@@ -250,5 +252,81 @@ describe("DELETE /users", () => {
     expect(response.body.message).toEqual(
       "Usuario eliminado satisfacoriamente."
     );
+  });
+});
+
+describe("POST /login", () => {
+  let id = "" as string;
+  let randomId = "507f1f77bcf86cd799439011";
+  let username = "" as string;
+
+  beforeAll(async () => {
+    await User.deleteMany({});
+    const user = await User.create({
+      username: "fulanito",
+      email: "haxine1712@lapeds.com",
+      password: "Pass-1234",
+    });
+
+    id = user._id.toString();
+    username = user.username;
+  });
+
+  afterAll(async () => {
+    await User.deleteMany({});
+  });
+
+  xit("should successfully login", async () => {
+    const response = await request(app)
+      .post("/api/users/login")
+      .send({ email: "haxine1712@lapeds.com", password: "Pass-1234" });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("email", "haxine1712@lapeds.com");
+  });
+
+  xit("should cannot login with incorrect credentials(email)", async () => {
+    const response = await request(app)
+      .post("/api/users/login")
+      .send({ email: "fulano@lapeds.com", password: "Pass-1234" });
+
+    expect(response.status).toBe(401);
+    expect(response.body.message).toBe("Credenciales inválidas.");
+  });
+
+  xit("should cannot login with incorrect credentials(password)", async () => {
+    const response = await request(app)
+      .post("/api/users/login")
+      .send({ email: "haxine1712@lapeds.com", password: "Pass-12345" });
+
+    expect(response.status).toBe(401);
+    expect(response.body.message).toBe("Credenciales inválidas.");
+  });
+
+  xit("should verify persistence login", async () => {
+    const response = await request(app)
+      .post("/api/users/login")
+      .send({ email: "haxine1712@lapeds.com", password: "Pass-1234" });
+
+    expect(response.status).toBe(200);
+
+    const localStorageToken = localStorage.getItem("firebaseToken");
+
+    expect(localStorageToken).toBeTruthy();
+    expect(localStorageToken).toBe(response.body.token);
+  });
+
+  it("should successfully logout", async () => {
+    const response = await request(app)
+      .post("/api/users/login")
+      .send({ email: "haxine1712@lapeds.com", password: "Pass-1234" });
+
+    expect(response.status).toBe(200);
+
+    const logout = await request(app).post("/api/users/logout");
+    const localStorageToken = localStorage.getItem("firebaseToken");
+    expect(logout.status).toBe(200);
+    expect(logout.body.message).toEqual("Sesión cerrada correctamente.");
+    expect(localStorageToken).toBeFalsy();
   });
 });

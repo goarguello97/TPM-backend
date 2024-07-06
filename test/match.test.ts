@@ -47,42 +47,29 @@ describe("POST /match", () => {
   });
 
   it("should cannot send match request if some user not exist", async () => {
-    const userA = await User.findById(idUserA);
-
     const response = await request(app)
       .post("/api/match/send")
-      .send({ idUser: randomId, idUserToMatch: userA?._id });
+      .send({ idUser: randomId, idUserToMatch: idUserA });
 
     expect(response.status).toBe(404);
     expect(response.body.message).toEqual("No existe uno de los usuarios.");
   });
 
-  it("should cannot send match request if some id is undefined or null",
-    async () => {
-      const [notUser, userA] = await Promise.all([
-        User.findById(randomId),
-        User.findById(idUserA),
-      ]);
-
-      const response = await request(app)
-        .post("/api/match/send")
-        .send({ idUser: notUser?._id, idUserToMatch: userA?._id });
-
-      expect(response.status).toBe(404);
-      expect(response.body.message).toEqual(
-        "No a ingresado el id correspondiente."
-      );
-    });
-
-  it("A match request should not be sent if any id is undefined or null.(reversed)", async () => {
-    const [notUser, userA] = await Promise.all([
-      User.findById(randomId),
-      User.findById(idUserA),
-    ]);
-
+  it("should cannot send match request if some id is undefined or null", async () => {
     const response = await request(app)
       .post("/api/match/send")
-      .send({ idUser: userA?._id, idUserToMatch: notUser?._id });
+      .send({ idUser: undefined, idUserToMatch: idUserA });
+
+    expect(response.status).toBe(404);
+    expect(response.body.message).toEqual(
+      "No a ingresado el id correspondiente."
+    );
+  });
+
+  it("A match request should not be sent if any id is undefined or null.(reversed)", async () => {
+    const response = await request(app)
+      .post("/api/match/send")
+      .send({ idUser: idUserA, idUserToMatch: undefined });
 
     expect(response.status).toBe(404);
     expect(response.body.message).toEqual(

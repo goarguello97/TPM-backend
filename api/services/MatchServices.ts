@@ -66,6 +66,10 @@ export default class MatchSerivices {
           path: "userMatch",
           select: "_id",
         });
+
+      if (match.length < 0)
+        throw new CustomError("No existe la solicitud.", 404);
+
       if (response) {
         await Promise.all([
           // Added the id to the match section once accepted.
@@ -84,12 +88,12 @@ export default class MatchSerivices {
           // The respective request ids matchReq and matchSend are removed, in sender as receiver.
           User.findByIdAndUpdate(
             { _id: match[0].user._id },
-            { $pull: { matchSend: { $in: match[0].userMatch._id } } },
+            { $pull: { matchSend: match[0].userMatch._id } },
             { new: true }
           ),
           User.findByIdAndUpdate(
             { _id: match[0].userMatch._id },
-            { $pull: { matchReq: { $in: match[0].user._id } } },
+            { $pull: { matchReq: match[0].user._id } },
             { new: true }
           ),
         ]);

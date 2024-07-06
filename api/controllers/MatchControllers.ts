@@ -19,7 +19,6 @@ export default class MatchController {
       idReceivingUser,
       response
     );
-    console.log(data)
     if (error) return res.status(404).json(data);
 
     return res.status(200).json(data);

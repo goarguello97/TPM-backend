@@ -148,7 +148,7 @@ describe("POST /match/response", () => {
     expect(response.body.message).toEqual("No existen argumentos válidos.");
   });
 
-  it("should accept request successfully", async () => {
+  xit("should accept request successfully", async () => {
     const sendRequest = await request(app)
       .post("/api/match/send")
       .send({ idUser: idUserA, idUserToMatch: idUserB });

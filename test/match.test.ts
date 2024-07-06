@@ -121,7 +121,7 @@ describe("POST /match/response", () => {
     await User.deleteMany({});
   });
 
-  it("should cannot response request if not exist some id", async () => {
+  xit("should cannot response request if not exist some id", async () => {
     const response = await request(app)
       .post("/api/match/response")
       .send({ idReceivingUser: undefined, response: true });

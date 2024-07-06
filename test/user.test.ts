@@ -1,4 +1,5 @@
 import request from "supertest";
+import "jest-localstorage-mock";
 import { app } from "../api/server";
 import dotenv from "dotenv";
 import User from "../api/models/User";

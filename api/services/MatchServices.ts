@@ -56,11 +56,16 @@ export default class MatchSerivices {
       if (!response && typeof response !== "boolean")
         throw new CustomError("No existe respuesta", 404);
 
+      /* const match = await Match.find(); */
       const match = await Match.find({ userMatch: idReceivingUser })
-        .populate<{
-          user: IUser;
-        }>("user", { _id: 1 })
-        .populate<{ userMatch: IUser }>("user", { _id: 1 });
+        .populate<{ user: IUser }>({
+          path: "user",
+          select: "_id",
+        })
+        .populate<{ userMatch: IUser }>({
+          path: "userMatch",
+          select: "_id",
+        });
       if (response) {
         await Promise.all([
           // Added the id to the match section once accepted.

@@ -148,10 +148,16 @@ describe("POST /match/response", () => {
     expect(response.body.message).toEqual("No existen argumentos válidos.");
   });
 
-  xit("should accept request successfully", async () => {
+  it("should accept request successfully", async () => {
+    const sendRequest = await request(app)
+      .post("/api/match/send")
+      .send({ idUser: idUserA, idUserToMatch: idUserB });
+
+    expect(sendRequest.status).toBe(200);
+
     const response = await request(app)
       .post("/api/match/response")
-      .send({ idReceivingUser: idUserA, response: true });
+      .send({ idReceivingUser: idUserB, response: true });
 
     expect(response.status).toBe(200);
     expect(response.body.message).toEqual("Match aceptado correctamente.");

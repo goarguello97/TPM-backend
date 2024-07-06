@@ -68,9 +68,13 @@ export default class UserController {
     const { error, data } = await UserServices.login(email, password);
 
     if (error) {
-      if (data === FirebaseErrorCodes.INVALID_CREDENTIALS) {
+      if (data === FirebaseErrorCodes.INVALID_EMAIL) {
         return res.status(401).json({ message: "Credenciales inválidas." });
       }
+      if (data === FirebaseErrorCodes.INVALID_PASSWORD) {
+        return res.status(401).json({ message: "Credenciales inválidas." });
+      }
+
       return res.status(401).json(data);
     }
 

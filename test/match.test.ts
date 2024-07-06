@@ -163,7 +163,7 @@ describe("POST /match/response", () => {
     expect(response.body.message).toEqual("Match aceptado correctamente.");
   });
 
-  xit("should deny request successfully", async () => {
+  it("should deny request successfully", async () => {
     const sendRequest = await request(app)
       .post("/api/match/send")
       .send({ idUser: idUserA, idUserToMatch: idUserB });

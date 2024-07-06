@@ -242,4 +242,16 @@ export default class UserServices {
       return { error: true, data: error };
     }
   }
+
+  static async logout() {
+    try {
+      localStorage.removeItem("firebaseToken");
+      return {
+        error: false,
+        data: { message: "Sesión cerrada correctamente." },
+      };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
 }

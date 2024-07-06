@@ -23,5 +23,6 @@ userRouter.patch(
   UserController.addAvatar
 );
 userRouter.post("/login", UserController.login);
+userRouter.post("/logout", UserController.logout);
 
 export default userRouter;

@@ -80,4 +80,14 @@ export default class UserController {
 
     return res.status(200).json(data);
   }
+
+  static async logout(req: Request, res: Response) {
+    const { error, data } = await UserServices.logout();
+
+    if (error) {
+      return res.status(401).json(data);
+    }
+
+    return res.status(200).json(data);
+  }
 }

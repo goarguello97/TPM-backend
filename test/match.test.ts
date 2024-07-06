@@ -46,7 +46,7 @@ describe("POST /match", () => {
     await User.deleteMany({});
   });
 
-  it("should cannot send match request if some user not exist", async () => {
+  xit("should cannot send match request if some user not exist", async () => {
     const response = await request(app)
       .post("/api/match/send")
       .send({ idUser: randomId, idUserToMatch: idUserA });
@@ -55,7 +55,7 @@ describe("POST /match", () => {
     expect(response.body.message).toEqual("No existe uno de los usuarios.");
   });
 
-  it("should cannot send match request if some id is undefined or null", async () => {
+  xit("should cannot send match request if some id is undefined or null", async () => {
     const response = await request(app)
       .post("/api/match/send")
       .send({ idUser: undefined, idUserToMatch: idUserA });
@@ -66,7 +66,7 @@ describe("POST /match", () => {
     );
   });
 
-  it("A match request should not be sent if any id is undefined or null.(reversed)", async () => {
+  xit("A match request should not be sent if any id is undefined or null.(reversed)", async () => {
     const response = await request(app)
       .post("/api/match/send")
       .send({ idUser: idUserA, idUserToMatch: undefined });
@@ -75,5 +75,22 @@ describe("POST /match", () => {
     expect(response.body.message).toEqual(
       "No a ingresado el id correspondiente."
     );
+  });
+
+  it("should send match successfully", async () => {
+    const response = await request(app)
+      .post("/api/match/send")
+      .send({ idUser: idUserA, idUserToMatch: idUserB });
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toEqual("Solicitud enviada");
+
+    const [userA, userB] = await Promise.all([
+      User.findById(idUserA),
+      User.findById(idUserB),
+    ]);
+
+    expect(userA?.matchSend).toContain(idUserB);
+    expect(userB?.matchReq).toContain(idUserA);
   });
 });

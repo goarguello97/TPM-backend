@@ -301,4 +301,17 @@ describe("POST /login", () => {
     expect(response.status).toBe(401);
     expect(response.body.message).toBe("Credenciales inválidas.");
   });
+
+  it("should verify persistence login", async () => {
+    const response = await request(app)
+      .post("/api/users/login")
+      .send({ email: "haxine1712@lapeds.com", password: "Pass-1234" });
+
+    expect(response.status).toBe(200);
+
+    const localStorageToken = localStorage.getItem("firebaseToken");
+
+    expect(localStorageToken).toBeTruthy();
+    expect(localStorageToken).toBe(response.body.token);
+  });
 });

@@ -229,7 +229,12 @@ export default class UserServices {
         email,
         password
       );
-      return { error: false, data: user };
+
+      const token = await user.getIdToken();
+
+      localStorage.setItem("firebaseToken", token);
+
+      return { error: false, data: { ...user, token } };
     } catch (error) {
       if (error instanceof FirebaseError) {
         return { error: true, data: error.code };

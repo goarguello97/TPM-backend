@@ -164,9 +164,15 @@ describe("POST /match/response", () => {
   });
 
   xit("should deny request successfully", async () => {
+    const sendRequest = await request(app)
+      .post("/api/match/send")
+      .send({ idUser: idUserA, idUserToMatch: idUserB });
+
+    expect(sendRequest.status).toBe(200);
+
     const response = await request(app)
       .post("/api/match/response")
-      .send({ idReceivingUser: idUserA, response: false });
+      .send({ idReceivingUser: idUserB, response: false });
 
     expect(response.status).toBe(200);
     expect(response.body.message).toEqual("Match rechazado correctamente.");

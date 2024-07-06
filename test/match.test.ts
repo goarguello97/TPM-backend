@@ -83,14 +83,14 @@ describe("POST /match", () => {
       .send({ idUser: idUserA, idUserToMatch: idUserB });
 
     expect(response.status).toBe(200);
-    expect(response.body.message).toEqual("Solicitud enviada");
+    expect(response.body.message).toEqual("Solicitud enviada.");
 
     const [userA, userB] = await Promise.all([
       User.findById(idUserA),
       User.findById(idUserB),
     ]);
 
-    expect(userA?.matchSend).toContain(idUserB);
-    expect(userB?.matchReq).toContain(idUserA);
+    expect(userA?.matchSend.some((id) => id.equals(idUserB))).toBe(true);
+    expect(userB?.matchReq.some((id) => id.equals(idUserA))).toBe(true);
   });
 });

@@ -1,4 +1,5 @@
 import CustomError from "../helpers/customError";
+import Match from "../models/Match";
 import User from "../models/User";
 
 export default class MatchSerivices {
@@ -20,7 +21,17 @@ export default class MatchSerivices {
       if (!userToMatch)
         throw new CustomError("No existe uno de los usuarios.", 404);
 
-      return { error: false, data: "in progress" };
+      const newMatch = new Match({ user: idUser, userMatch: idUserToMatch });
+
+      await newMatch.save();
+
+      user.matchSend = user.matchSend.concat(userToMatch.id);
+      userToMatch.matchReq = userToMatch.matchReq.concat(user.id);
+
+      await user.save();
+      await userToMatch.save();
+
+      return { error: false, data: { message: "Solicitud enviada." } };
     } catch (error) {
       if (error instanceof CustomError) {
         return {

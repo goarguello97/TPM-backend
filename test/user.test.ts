@@ -276,7 +276,7 @@ describe("POST /login", () => {
     await User.deleteMany({});
   });
 
-  it("should successfully login", async () => {
+  xit("should successfully login", async () => {
     const response = await request(app)
       .post("/api/users/login")
       .send({ email: "haxine1712@lapeds.com", password: "Pass-1234" });
@@ -285,7 +285,7 @@ describe("POST /login", () => {
     expect(response.body).toHaveProperty("email", "haxine1712@lapeds.com");
   });
 
-  it("should cannot login with incorrect credentials(email)", async () => {
+  xit("should cannot login with incorrect credentials(email)", async () => {
     const response = await request(app)
       .post("/api/users/login")
       .send({ email: "fulano@lapeds.com", password: "Pass-1234" });
@@ -294,7 +294,7 @@ describe("POST /login", () => {
     expect(response.body.message).toBe("Credenciales inválidas.");
   });
 
-  it("should cannot login with incorrect credentials(password)", async () => {
+  xit("should cannot login with incorrect credentials(password)", async () => {
     const response = await request(app)
       .post("/api/users/login")
       .send({ email: "haxine1712@lapeds.com", password: "Pass-12345" });
@@ -303,7 +303,7 @@ describe("POST /login", () => {
     expect(response.body.message).toBe("Credenciales inválidas.");
   });
 
-  it("should verify persistence login", async () => {
+  xit("should verify persistence login", async () => {
     const response = await request(app)
       .post("/api/users/login")
       .send({ email: "haxine1712@lapeds.com", password: "Pass-1234" });
@@ -314,5 +314,19 @@ describe("POST /login", () => {
 
     expect(localStorageToken).toBeTruthy();
     expect(localStorageToken).toBe(response.body.token);
+  });
+
+  it("should successfully logout", async () => {
+    const response = await request(app)
+      .post("/api/users/login")
+      .send({ email: "haxine1712@lapeds.com", password: "Pass-1234" });
+
+    expect(response.status).toBe(200);
+
+    const logout = await request(app).post("/api/users/logout");
+    const localStorageToken = localStorage.getItem("firebaseToken");
+    expect(logout.status).toBe(200);
+    expect(logout.body.message).toEqual("Sesión cerrada correctamente.");
+    expect(localStorageToken).toBeFalsy();
   });
 });

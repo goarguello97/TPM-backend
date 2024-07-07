@@ -22,13 +22,13 @@ export function generateTokenRecover(payload: IUser) {
   return token;
 }
 
-export function dataToken(token: string) {
-  let data = null;
+export function dataToken(token: string): { user: IUser } | null {
+  let data: { user: IUser } | null = null;
   jwt.verify(token, SECRET, (err, decoded) => {
     if (err) {
       console.log(err);
     } else {
-      data = decoded;
+      data = decoded as { user: IUser };
     }
   });
   return data;

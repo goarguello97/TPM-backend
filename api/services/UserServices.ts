@@ -1,4 +1,4 @@
-import { generateTokenRegister } from "../config/token";
+import { dataToken, generateTokenRegister } from "../config/token";
 import CustomError from "../helpers/customError";
 import Photo from "../models/Photo";
 import User from "../models/User";
@@ -97,7 +97,7 @@ export default class UserServices {
       await FirebaseService.addUserFirebase(email, username, password);
       await newUser.save();
 
-      return { error: false, data: newUser };
+      return { error: false, data: { ...newUser, token } };
     } catch (error) {
       console.log(error);
       return { error: true, data: error };
@@ -254,4 +254,15 @@ export default class UserServices {
       return { error: true, data: error };
     }
   }
+
+  /* static async verifyUser(token: string) {
+    try {
+      const data = dataToken(token);
+      if (data === null) throw new CustomError("Token inválido.", 404);
+
+      const { email } = data.user;
+      const user = await User.findOne({ email });
+      if(!user) throw new CustomError("")
+    } catch (error) {}
+  } */
 }

@@ -3,6 +3,6 @@ export default {
   preset: "ts-jest",
   testEnvironment: "node",
   verbose: true,
-  testMatch: ["**/match.test.ts"],
+  testMatch: ["**/user.test.ts"],
   testTimeout: 10000,
 };

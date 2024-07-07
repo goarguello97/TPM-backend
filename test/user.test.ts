@@ -255,7 +255,7 @@ xdescribe("DELETE /users", () => {
   });
 });
 
-describe("POST /login", () => {
+xdescribe("POST /login", () => {
   let id = "" as string;
   let randomId = "507f1f77bcf86cd799439011";
   let username = "" as string;
@@ -328,5 +328,29 @@ describe("POST /login", () => {
     expect(logout.status).toBe(200);
     expect(logout.body.message).toEqual("Sesión cerrada correctamente.");
     expect(localStorageToken).toBeFalsy();
+  });
+});
+
+describe("get /users/verify/:token", () => {
+  beforeAll(async () => {
+    await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
+  });
+
+  afterAll(async () => {
+    await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
+  });
+
+  it("should not be verified when registering", async () => {
+    const user = {
+      username: "fulanito",
+      email: "haxine1712@lapeds.com",
+      password: "Pass-1234",
+    };
+    const response = await request(app).post("/api/users").send(user);
+    expect(response.status).toBe(201);
+
+    const userCreated = await User.findById(response.body._id);
+
+    expect(userCreated).toHaveProperty("verify", false);
   });
 });

@@ -262,7 +262,7 @@ export default class UserServices {
 
       const { email } = data.user;
       const user = await User.findOne({ email });
-      if (!user) throw new CustomError("El usuario no existe", 404);
+          if (!user) throw new CustomError("El usuario no existe", 404);
       user.verify = true;
 
       await user.save();

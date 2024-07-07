@@ -97,7 +97,7 @@ export default class UserController {
     const { error, data } = await UserServices.verifyUser(token);
 
     if (error) {
-      return res.status(401).json(data);
+      return res.status(404).json(data);
     }
 
     return res.status(200).json(data);

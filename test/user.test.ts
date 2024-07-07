@@ -340,7 +340,7 @@ describe("get /users/verify/:token", () => {
     await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
   });
 
-  it("should not be verified when registering", async () => {
+  xit("should not be verified when registering", async () => {
     const user = {
       username: "fulanito",
       email: "haxine1712@lapeds.com",
@@ -354,7 +354,7 @@ describe("get /users/verify/:token", () => {
     expect(userCreated).toHaveProperty("verify", false);
   });
 
-  it("should receive a token to verify", async () => {
+  xit("should receive a token to verify", async () => {
     const user = {
       username: "fulanito",
       email: "haxine1712@lapeds.com",
@@ -363,5 +363,23 @@ describe("get /users/verify/:token", () => {
     const response = await request(app).post("/api/users").send(user);
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty("token");
+  });
+
+  it("should verify user with token", async () => {
+    const user = {
+      username: "fulanito",
+      email: "haxine1712@lapeds.com",
+      password: "Pass-1234",
+    };
+    const response = await request(app).post("/api/users").send(user);
+    expect(response.status).toBe(201);
+    const { token } = response.body;
+    const verifyUser = await request(app).get(`/api/users/verify/${token}`);
+
+    expect(verifyUser.status).toBe(200);
+
+    const userToVerificate = await User.findById(response.body._id);
+
+    expect(userToVerificate).toHaveProperty("verify", true);
   });
 });

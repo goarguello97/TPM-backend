@@ -1,9 +1,13 @@
-import { dataToken, generateTokenRegister } from "../config/token";
+import {
+  dataToken,
+  generateTokenRecover,
+  generateTokenRegister,
+} from "../config/token";
 import CustomError from "../helpers/customError";
 import Photo from "../models/Photo";
 import User from "../models/User";
 import bcrypt from "bcrypt";
-import { getTemplate, transporter } from "../utils/mail";
+import { getTemplate, getTemplateRecover, transporter } from "../utils/mail";
 import { IRegisterUser } from "../interfaces/IRegisterUser";
 import Role from "../models/Role";
 import { v4 as uuid } from "uuid";
@@ -262,13 +266,102 @@ export default class UserServices {
 
       const { email } = data.user;
       const user = await User.findOne({ email });
-          if (!user) throw new CustomError("El usuario no existe", 404);
+      if (!user) throw new CustomError("El usuario no existe", 404);
       user.verify = true;
 
       await user.save();
       return {
         error: false,
         data: { message: "Usuario verificado correctamente." },
+      };
+    } catch (error) {
+      if (error instanceof CustomError) {
+        return {
+          error: true,
+          data: { code: error.code, message: error.message },
+        };
+      } else {
+        return { error: true, data: error };
+      }
+    }
+  }
+
+  static async recoverPassword(email: string) {
+    try {
+      const user = await User.findOne({ email });
+
+      if (!user) throw new CustomError("Usuario no existe.", 404);
+
+      const token = generateTokenRecover(user);
+      const template = getTemplateRecover(user.username, token);
+
+      await transporter.sendMail({
+        from: `The Perfect Mentor <${EMAIL}>`,
+        to: email,
+        subject: "Recuperar contraseña",
+        text: "...",
+        html: template,
+      });
+
+      user.tokenRecover = token;
+      await user.save();
+
+      return {
+        error: false,
+        data: { message: "Revise su correo electrónico porfavor.", token },
+      };
+    } catch (error) {
+      if (error instanceof CustomError) {
+        return {
+          error: true,
+          data: { code: error.code, message: error.message },
+        };
+      } else {
+        return { error: true, data: error };
+      }
+    }
+  }
+
+  static async authorizeChangePass(token: string) {
+    try {
+      const data = dataToken(token);
+      if (data === null) throw new CustomError("Token inválido.", 404);
+
+      const { email } = data.user;
+      const user = await User.findOne({ email });
+
+      if (!user) throw new CustomError("Usuario no existe.", 404);
+
+      if (user.tokenRecover !== token)
+        throw new CustomError("Token inválido.", 404);
+
+      return { error: false, data: { message: "Autorizado a modificar." } };
+    } catch (error) {
+      if (error instanceof CustomError) {
+        return {
+          error: true,
+          data: { code: error.code, message: error.message },
+        };
+      } else {
+        return { error: true, data: error };
+      }
+    }
+  }
+
+  static async updatePassword(email: string, password: string) {
+    try {
+      const user = await User.findOne({ email });
+
+      if (!user) throw new CustomError("Usuario no existe.", 404);
+
+      const salt = await bcrypt.genSalt(10);
+      const passwordEncrypted = await bcrypt.hash(password, salt);
+      user.password = passwordEncrypted;
+      await user.save();
+
+      return {
+        error: false,
+        data: { message: "Contraseña modificada exitosamente." },
       };
     } catch (error) {
       if (error instanceof CustomError) {

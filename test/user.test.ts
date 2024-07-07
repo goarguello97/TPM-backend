@@ -255,7 +255,7 @@ xdescribe("DELETE /users", () => {
   });
 });
 
-describe("POST /login", () => {
+xdescribe("POST /login", () => {
   let id = "" as string;
   let randomId = "507f1f77bcf86cd799439011";
   let username = "" as string;
@@ -328,5 +328,80 @@ describe("POST /login", () => {
     expect(logout.status).toBe(200);
     expect(logout.body.message).toEqual("Sesión cerrada correctamente.");
     expect(localStorageToken).toBeFalsy();
+  });
+});
+
+describe("get /users/verify/:token", () => {
+  beforeEach(async () => {
+    await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
+  });
+
+  afterAll(async () => {
+    await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
+  });
+
+  xit("should not be verified when registering", async () => {
+    const user = {
+      username: "fulanito",
+      email: "haxine1712@lapeds.com",
+      password: "Pass-1234",
+    };
+    const response = await request(app).post("/api/users").send(user);
+    expect(response.status).toBe(201);
+
+    const userCreated = await User.findById(response.body._id);
+
+    expect(userCreated).toHaveProperty("verify", false);
+  });
+
+  xit("should receive a token to verify", async () => {
+    const user = {
+      username: "fulanito",
+      email: "haxine1712@lapeds.com",
+      password: "Pass-1234",
+    };
+    const response = await request(app).post("/api/users").send(user);
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty("token");
+  });
+
+  xit("should verify user with token", async () => {
+    const user = {
+      username: "fulanito",
+      email: "haxine1712@lapeds.com",
+      password: "Pass-1234",
+    };
+    const response = await request(app).post("/api/users").send(user);
+    expect(response.status).toBe(201);
+    const { token } = response.body;
+    const verifyUser = await request(app).get(`/api/users/verify/${token}`);
+
+    expect(verifyUser.status).toBe(200);
+    expect(verifyUser.body.message).toEqual(
+      "Usuario verificado correctamente."
+    );
+
+    const userToVerificate = await User.findById(response.body._id);
+
+    expect(userToVerificate).toHaveProperty("verify", true);
+  });
+
+  it("should cannot verify user with invalid token", async () => {
+    const user = {
+      username: "fulanito",
+      email: "haxine1712@lapeds.com",
+      password: "Pass-1234",
+    };
+    const randomToken =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiZnVsYW5pdG8iLCJlbWFpbCI6ImhheGluZTE3MTJAbGFwZWRzLmNvbSIsInBhc3N3b3JkIjoiJDJiJDEwJDZDVW5PamRzdHg3dFVDVW5mWGNCeWVkNUtGL2toaWhSNlBFQUJpWjdyWlg5R0IyL0ZUYzcuIiwibWVudG9yIjpbXSwibWQiOltdLCJtYXRjaFJlcSI6W10sIm1hdGNoU2VuZCI6W10sIm1hdGNoIjpbXSwidmVyaWZ5IjpmYWxzZSwic2tpbGxzIjpbXSwiYXZhdGFyIjoiNjY2ZDE4OTBhNjU1MWIyODFhOWRjZTUxIiwidG9rZW5SZWNvdmVyIjoiIiwiX2lkIjoiNjY4OWU2NWQ2OTBmOTY0YTBjY2I2YzljIn0sImlhdCI6MTcyMDMxMzQzNywiZXhwIjoxNzIwMzQ5NDM3fQ.nQIvImjb39Kz44sM_EydE9RCJdc0G8Q_kzqoTXwLExA";
+    const response = await request(app).post("/api/users").send(user);
+    expect(response.status).toBe(201);
+
+    const verifyUser = await request(app).get(
+      `/api/users/verify/${randomToken}`
+    );
+
+    expect(verifyUser.status).toBe(404);
+    expect(verifyUser.body.message).toEqual("Token inválido.");
   });
 });

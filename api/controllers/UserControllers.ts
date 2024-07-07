@@ -90,4 +90,16 @@ export default class UserController {
 
     return res.status(200).json(data);
   }
+
+  static async verifyUser(req: Request, res: Response) {
+    const { token } = req.params;
+
+    const { error, data } = await UserServices.verifyUser(token);
+
+    if (error) {
+      return res.status(404).json(data);
+    }
+
+    return res.status(200).json(data);
+  }
 }

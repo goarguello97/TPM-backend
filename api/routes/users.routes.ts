@@ -25,5 +25,6 @@ userRouter.patch(
 userRouter.post("/login", UserController.login);
 userRouter.post("/logout", UserController.logout);
 userRouter.get("/verify/:token", UserController.verifyUser);
+userRouter.post("/recover-pass", UserController.recoverPassword);
 
 export default userRouter;

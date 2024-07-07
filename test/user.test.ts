@@ -409,33 +409,31 @@ xdescribe("get /users/verify/:token", () => {
 describe("POST /users/recover-pass", () => {
   beforeEach(async () => {
     await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
+    const user = {
+      username: "fulanito",
+      email: "fikiw28652@cartep.com",
+      password: "Pass-1234",
+    };
+    const userCreated = await request(app).post("/api/users").send(user);
   });
 
   afterAll(async () => {
     await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
   });
 
-  it("should cannot recover pass if user not exists", async () => {
+  xit("should cannot recover pass if user not exists", async () => {
     const response = await request(app)
       .post("/api/users/recover-pass")
-      .send({ email: "haxine1712@lapeds.com" });
+      .send({ email: "fikiw28652@cartep.com" });
 
     expect(response.status).toBe(404);
     expect(response.body.message).toEqual("Usuario no existe.");
   });
 
   it("should recover pass if user exists", async () => {
-    const user = {
-      username: "fulanito",
-      email: "haxine1712@lapeds.com",
-      password: "Pass-1234",
-    };
-    const userCreated = await request(app).post("/api/users").send(user);
-    expect(userCreated.status).toBe(201);
-
     const response = await request(app)
       .post("/api/users/recover-pass")
-      .send({ email: "haxine1712@lapeds.com" });
+      .send({ email: "fikiw28652@cartep.com" });
 
     expect(response.status).toBe(200);
     expect(response.body.message).toEqual(

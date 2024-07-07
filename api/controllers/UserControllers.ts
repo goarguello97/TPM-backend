@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import UserServices from "../services/UserServices";
 import CustomError from "../helpers/customError";
 import { FirebaseErrorCodes } from "../enum/firebaseCodesError";
+import User from "../models/User";
 
 export default class UserController {
   static async getUsers(req: Request, res: Response) {
@@ -101,5 +102,15 @@ export default class UserController {
     }
 
     return res.status(200).json(data);
+  }
+
+  static async recoverPassword(req:Request, res:Response){
+    const {email} = req.body
+
+    const {error, data} = await UserServices.recoverPassword(email)
+
+    if(error) return res.status(404).json(data)
+
+      return res.status(200).json(data)
   }
 }

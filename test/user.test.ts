@@ -516,7 +516,7 @@ describe("PATCH /users/change-pass", () => {
     expect(userCreated.status).toBe(201);
 
     const response = await request(app)
-      .patch("api/users/change-pass")
+      .patch("/api/users/change-pass")
       .send({ email: "fikiw28652@cartep.com", password: "Pass-123456" });
 
     expect(response.status).toBe(200);

@@ -347,4 +347,31 @@ export default class UserServices {
       }
     }
   }
+
+  static async updatePassword(email: string, password: string) {
+    try {
+      const user = await User.findOne({ email });
+
+      if (!user) throw new CustomError("Usuario no existe.", 404);
+
+      const salt = await bcrypt.genSalt(10);
+      const passwordEncrypted = await bcrypt.hash(password, salt);
+      user.password = passwordEncrypted;
+      await user.save();
+
+      return {
+        error: false,
+        data: { message: "Contraseña modificada exitosamente." },
+      };
+    } catch (error) {
+      if (error instanceof CustomError) {
+        return {
+          error: true,
+          data: { code: error.code, message: error.message },
+        };
+      } else {
+        return { error: true, data: error };
+      }
+    }
+  }
 }

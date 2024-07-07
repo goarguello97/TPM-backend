@@ -123,4 +123,14 @@ export default class UserController {
 
     return res.status(200).json(data);
   }
+
+  static async updatePassword(req: Request, res: Response) {
+    const { email, password } = req.body;
+
+    const { error, data } = await UserServices.updatePassword(email, password);
+
+    if (error) return res.status(404).json(data);
+
+    return res.status(200).json(data);
+  }
 }

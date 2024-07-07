@@ -30,5 +30,6 @@ userRouter.get(
   "/authorize/change-pass/:token",
   UserController.authorizeChangePass
 );
+userRouter.patch("/change-pass", UserController.updatePassword);
 
 export default userRouter;

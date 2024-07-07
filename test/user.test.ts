@@ -332,7 +332,7 @@ xdescribe("POST /login", () => {
 });
 
 describe("get /users/verify/:token", () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
   });
 
@@ -354,7 +354,7 @@ describe("get /users/verify/:token", () => {
     expect(userCreated).toHaveProperty("verify", false);
   });
 
-  xit("should receive a token to verify", async () => {
+  it("should receive a token to verify", async () => {
     const user = {
       username: "fulanito",
       email: "haxine1712@lapeds.com",

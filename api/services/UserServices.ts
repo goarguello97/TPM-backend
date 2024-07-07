@@ -97,7 +97,7 @@ export default class UserServices {
       await FirebaseService.addUserFirebase(email, username, password);
       await newUser.save();
 
-      return { error: false, data: { ...newUser, token } };
+      return { error: false, data: { ...newUser.toObject(), token } };
     } catch (error) {
       console.log(error);
       return { error: true, data: error };

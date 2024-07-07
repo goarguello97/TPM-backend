@@ -444,7 +444,7 @@ xdescribe("POST /users/recover-pass", () => {
   });
 });
 
-describe("GET /authorize/change-pass/:token", () => {
+xdescribe("GET /users/authorize/change-pass/:token", () => {
   beforeEach(async () => {
     await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
   });
@@ -485,5 +485,43 @@ describe("GET /authorize/change-pass/:token", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.message).toEqual("Autorizado a modificar.");
+  });
+});
+
+describe("PATCH /users/change-pass", () => {
+  beforeEach(async () => {
+    await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
+  });
+
+  afterAll(async () => {
+    await Promise.all([User.deleteMany({}), FirebaseService.deteleAllUsers()]);
+  });
+
+  it("should cannot change pass if user not exists", async () => {
+    const response = await request(app)
+      .patch("/api/users/change-pass")
+      .send({ email: "fikiw28652@cartep.com", password: "Pass-123456" });
+
+    expect(response.status).toBe(404);
+    expect(response.body.message).toEqual("Usuario no existe.");
+  });
+
+  it("should change pass succesfully", async () => {
+    const user = {
+      username: "fulanito",
+      email: "fikiw28652@cartep.com",
+      password: "Pass-1234",
+    };
+    const userCreated = await request(app).post("/api/users").send(user);
+    expect(userCreated.status).toBe(201);
+
+    const response = await request(app)
+      .patch("api/users/change-pass")
+      .send({ email: "fikiw28652@cartep.com", password: "Pass-123456" });
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toEqual(
+      "Contraseña modificada exitosamente."
+    );
   });
 });

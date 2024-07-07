@@ -104,13 +104,23 @@ export default class UserController {
     return res.status(200).json(data);
   }
 
-  static async recoverPassword(req:Request, res:Response){
-    const {email} = req.body
+  static async recoverPassword(req: Request, res: Response) {
+    const { email } = req.body;
 
-    const {error, data} = await UserServices.recoverPassword(email)
+    const { error, data } = await UserServices.recoverPassword(email);
 
-    if(error) return res.status(404).json(data)
+    if (error) return res.status(404).json(data);
 
-      return res.status(200).json(data)
+    return res.status(200).json(data);
+  }
+
+  static async authorizeChangePass(req: Request, res: Response) {
+    const { token } = req.params;
+
+    const { error, data } = await UserServices.authorizeChangePass(token);
+
+    if (error) return res.status(404).json(data);
+
+    return res.status(200).json(data);
   }
 }

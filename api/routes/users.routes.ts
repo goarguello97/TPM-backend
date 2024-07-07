@@ -26,5 +26,9 @@ userRouter.post("/login", UserController.login);
 userRouter.post("/logout", UserController.logout);
 userRouter.get("/verify/:token", UserController.verifyUser);
 userRouter.post("/recover-pass", UserController.recoverPassword);
+userRouter.get(
+  "/authorize/change-pass/:token",
+  UserController.authorizeChangePass
+);
 
 export default userRouter;

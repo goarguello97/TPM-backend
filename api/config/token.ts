@@ -1,6 +1,5 @@
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import dotenv from "dotenv";
-import { IPayload } from "../interfaces/IPayload";
 import { IUser } from "../interfaces/IUser";
 
 dotenv.config();

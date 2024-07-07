@@ -308,8 +308,34 @@ export default class UserServices {
 
       return {
         error: false,
-        data: { message: "Revise su correo electrónico porfavor." },
+        data: { message: "Revise su correo electrónico porfavor.", token },
       };
+    } catch (error) {
+      if (error instanceof CustomError) {
+        return {
+          error: true,
+          data: { code: error.code, message: error.message },
+        };
+      } else {
+        return { error: true, data: error };
+      }
+    }
+  }
+
+  static async authorizeChangePass(token: string) {
+    try {
+      const data = dataToken(token);
+      if (data === null) throw new CustomError("Token inválido.", 404);
+
+      const { email } = data.user;
+      const user = await User.findOne({ email });
+
+      if (!user) throw new CustomError("Usuario no existe.", 404);
+
+      if (user.tokenRecover !== token)
+        throw new CustomError("Token inválido.", 404);
+
+      return { error: false, data: { message: "Autorizado a modificar." } };
     } catch (error) {
       if (error instanceof CustomError) {
         return {

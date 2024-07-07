@@ -353,4 +353,15 @@ describe("get /users/verify/:token", () => {
 
     expect(userCreated).toHaveProperty("verify", false);
   });
+
+  xit("should receive a token to verify", async () => {
+    const user = {
+      username: "fulanito",
+      email: "haxine1712@lapeds.com",
+      password: "Pass-1234",
+    };
+    const response = await request(app).post("/api/users").send(user);
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty("token");
+  });
 });
